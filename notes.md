@@ -1,0 +1,30 @@
+# Entry [0]
+
+1. Customer name [_name]
+2. Customer post code, street, city, country [optional] [_addr]
+3. tel [_tel]
+4. email [_email]
+5. date [_date]
+
+
+
+# Entry [1]
+
+1. proforma invoice number [_inumber]
+3. product name, brand, origin [_product]
+4. packing size [_size]
+5. prices, currency, price_type [cif, fob] [_price]
+6. unit/container [_container]
+7. no of container [_ncontainer]
+8. total cost (currency) [_currency]
+9. total amount [_price * _ncontainer]
+
+
+# Entry [2]
+
+1. payment [deposit_value]
+2. delivery
+3. account number
+4. bank name
+5. bank branch location
+6. bank swift code

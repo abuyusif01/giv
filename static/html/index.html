@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Insert Data</title>
+    <script src="./index.js"></script>
+    <link rel="stylesheet" href="./style.css">
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous"> -->
+
+</head>
+
+<body>
+
+    <div class="container">
+        <form action="/submit" method="post">
+
+            <!-- start entry 0 -->
+            <div class="row">
+                <h4>Entry 0 - Customer Info</h4>
+
+                <!--  name -->
+                <div class="input-group input-group-icon">
+                    <input type="text" placeholder="Customer Name / Company Name" name="_name" />
+                    <div class="input-icon"><i class="fa fa-user"></i></div>
+                </div>
+
+
+                <!-- addr -->
+                <div class="input-group input-group-icon">
+                    <input type="text" placeholder="Customer Address" name="_addr" />
+                    <div class="input-icon"><i class="fa fa-user"></i></div>
+                </div>
+
+
+                <!-- tel -->
+                <div class="input-group input-group-icon">
+                    <input type="text" placeholder="Customer Name / Company Name" name="_tel" />
+                    <div class="input-icon"><i class="fa fa-user"></i></div>
+                </div>
+
+
+                <!-- email -->
+                <div class="input-group input-group-icon">
+                    <input type="email" placeholder="Email Adress" name="_email" />
+                    <div class="input-icon"><i class="fa fa-envelope"></i></div>
+                </div>
+
+
+            </div>
+
+            <!-- /end of entry 0 -->
+
+
+            <div>
+                <input type="submit" value="Submit" />
+            </div>
+
+        </form>
+    </div>
+</body>
+
+</html>
