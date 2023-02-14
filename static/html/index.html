@@ -13,26 +13,30 @@
 
 <body>
     <form id="regForm" action="/submit" method="post">
-        <h1>Register:</h1>
+        
         <!-- One "tab" for each step in the form: -->
-        <div class="tab">Entry0:
+        <div class="tab">
+            <h1> Customer Details</h1>
             <p><input placeholder="Customer Name / Company Name" oninput="this.className = ''" name="_name"></p>
             <p><input placeholder="Address" oninput="this.className = ''" name="_addr"></p>
             <p><input placeholder="Phone number" oninput="this.className = ''" name="_tel"></p>
             <p><input placeholder="Email" oninput="this.className = ''" name="_email"></p>
         </div>
-        <div class="tab">Entry1:
+        <div class="tab">
+            <h1>Product Details</h1>
             <p><input placeholder="Invoice Number" oninput="this.className = ''" name="_inumber"></p>
             <p><input placeholder="Product Name" oninput="this.className = ''" name="_product"></p>
             <p><input placeholder="Packing Size" oninput="this.className = ''" name="_size"></p>
             <p><input placeholder="Price" oninput="this.className = ''" name="_price"></p>
-            <p><input placeholder="Unit / Container" oninput="this.className = ''" name="_container"></p>
+            <p><input placeholder="Unit / Container" oninput="this.className = ''" name="_ucontainer"></p>
             <p><input placeholder="No of Container" oninput="this.className = ''" name="_ncontainer"></p>
             <p><input placeholder="Total Cost" oninput="this.className = ''" name="_tcost"></p>
 
         </div>
-        <div class="tab">Entry2:
-            <p><input placeholder="Payment" oninput="this.className = ''" name="_depo"></p>
+        <div class="tab">
+            <h1>Delivery and Payment</h1>
+            <p><input placeholder="Deposite" oninput="this.className = ''" name="_depo"></p>
+            <p><input placeholder="CURRENCY" oninput="this.className = ''" name="_currency"></p>
             <p><input placeholder="Delivery" oninput="this.className = ''" name="_delivery"></p>
 
         </div>

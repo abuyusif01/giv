@@ -18,85 +18,55 @@ const pdfConfig = {
     indTableLength: 90,
 }
 
-
-const entry0 = {
-    name: 'Entry 0',
-    items: [
-        {
-            name: 'Abubakar Abubakar Yusif',
-            addr: "Mahallah Uthman, Block D. IIUM",
-            tel: "01139997142",
-            email: 'abuyusif01@gmail.com',
-        },
-        {
-            name: 'Item 1',
-            price: 20,
-            quantity: 2,
-        },
-        {
-            name: 'Item 2',
-            price: 30,
-            quantity: 3,
-        },
-    ],
-};
-
-
-const entry1 = {
-    items: [
-        {
-            product: 'Product 1',
-            size: 20,
-            price: 2,
-            unit_container: 2,
-            no_container: 2,
-
-        },
-        {
-            product: 'Product 2',
-            size: 30,
-            price: 3,
-            unit_container: 3,
-            no_container: 3,
-        },
-    ],
+const currency_map = {
+    "USD": "$",
+    "EUR": "€",
+    "GBP": "£",
+    "INR": "₹",
+    "AUD": "$",
+    "CAD": "$",
+    "SGD": "$",
+    "CHF": "CHF",
+    "MYR": "RM",
+    "JPY": "¥",
+    "CNY": "¥",
+    "HKD": "$",
+    "NZD": "$",
+    "THB": "฿",
+    "PHP": "₱",
 }
 
+const date = new Date();
+let day = date.getDate();
+let month = date.getMonth() + 1;
+let year = date.getFullYear();
+let currentDate = `${day < 10 ? "0" + day : day}-${month < 10 ? "0" + month : month}-${year}`;
 
-const generateEntry0 = (doc, entry0) => {
 
-    const date = new Date();
 
-    let day = date.getDate();
-    let month = date.getMonth() + 1;
-    let year = date.getFullYear();
-    let currentDate = `${day}-${month}-${year}`;
+const generateEntry0 = (doc, invoice) => {
 
-    doc.fontSize(14).font('Times-Bold')
-        .text(entry0.items[0].name.toUpperCase(), 30, 120, { align: 'left' })
+
+    doc.fontSize(12).font('Times-Bold')
+        .text(invoice._name.toUpperCase(), 30, 120, { align: 'left' }) // name
         .font('Times-Roman')
-        .text(entry0.items[0].addr, pdfConfig.startPoint, 140, { align: 'left' })
-        .text("Tel: " + entry0.items[0].tel, pdfConfig.startPoint, 155, { align: 'left' })
-        .text("EMAIL: " + entry0.items[0].email, pdfConfig.startPoint, 170, { align: 'left' })
-        .text("DATE: " + currentDate, 0, 125, { align: 'right' })
-
+        .text(invoice._addr, pdfConfig.startPoint, 140, { align: 'left' }) // address
+        .text("Tel: " + invoice._tel, pdfConfig.startPoint, 155, { align: 'left' }) // tel
+        .text("EMAIL: " + invoice._email, pdfConfig.startPoint, 170, { align: 'left' }) // email
+        .text("DATE: " + currentDate, 0, 125, { align: 'right' }) // date
 
 }
 
-const generateEntry1 = (doc, entry1, x = 0) => {
-
-
-    let month = new Date().getMonth() + 1;
-    let year = new Date().getFullYear();
+const generateEntry1 = (doc, invoice, x = 0) => {
 
     doc.fontSize(10).font('Times-Roman');
     doc
         .moveDown(5.5).fontSize(14)
         .font('Times-Bold')
-        .text("PROFOMA INVOICE: " + `PI/PI_number/${month}/${year}`, {
+        .text("PROFOMA INVOICE: " + `PI/${invoice._inumber}/${month < 10 ? "0" + month : month}/${year}`, {
             underline: true,
             align: 'center',
-        }).moveDown(0.5);
+        }).moveDown(0.5); // title for secion 1
 
     doc.moveTo(30, doc.y)
         .lineTo(doc.page.width - 25, doc.y)
@@ -141,17 +111,17 @@ const generateEntry1 = (doc, entry1, x = 0) => {
         "datas": [
             {
 
-                "_product": "PRODUCT NAME: \nBRAND: \nORIGIN: ",
-                "_size": "",
-                "_price": "USD XXX / CARTON OR JERRY CAN",
-                "_ucontainer": "NUMBER OF CARTON OR JERRY CAN INSIDE A CONTAINER",
-                "_ncontainer": "NUMBER OF CONTAINER",
-                "_tcost": "bold:TOTAL AMOUNT (UNIT PRICE *NUMBER OF CARTON OR JERRY CAN)",
+                "_product": invoice._product.replaceAll(", ", "\n").replaceAll(",", "\n"),
+                "_size": invoice._size,
+                "_price": invoice._price,
+                "_ucontainer": invoice._ucontainer,
+                "_ncontainer": invoice._ncontainer,
+                "_tcost": `bold: ${currency_map[invoice._currency]} ${invoice._tcost}`,
             },
 
             {
-                "_product": "200000",
-                "_tcost": "Free product",
+                "_product": "bold:TOTAL AMOUNT",
+                "_tcost": `bold: ${currency_map[invoice._currency]} ${invoice._tcost}`,
             }
 
         ],
@@ -325,8 +295,8 @@ const generateHeader = (doc) => {
 
 const signatureEntry = (doc, x = 1) => {
 
-    x == 0 ? doc.image('./static/images/signature.jpeg', 50, 740 , { width: 120 }) :
-        doc.image('./static/images/signature.jpeg', 50, 720 , { width: 120 });
+    x == 0 ? doc.image('./static/images/signature.jpeg', 50, 740, { width: 120 }) :
+        doc.image('./static/images/signature.jpeg', 50, 720, { width: 120 });
 
     doc
         .moveDown(1)
@@ -363,17 +333,16 @@ const createInvoice = (invoice, path) => {
 
     generateHeader(doc); // Invoke `generateHeader` function.
 
-    generateEntry0(doc, entry0); // Invoke `generateEntry0` function.
-    generateEntry1(doc, entry1); // Invoke `generateEntry1` function.
-    generateEntry2(doc, entry1); // Invoke `generateEntry2` function.
+    generateEntry0(doc, invoice); // Invoke `generateEntry0` function.
+    generateEntry1(doc, invoice); // Invoke `generateEntry1` function.
+    generateEntry2(doc, invoice); // Invoke `generateEntry2` function.
     generateFooter(doc); // Invoke `generateFooter` function.
 
     doc.addPage();
     generateHeader(doc);
-    generateEntry0(doc, entry0); // Invoke `generateEntry0` function.
-    generateEntry1(doc, entry1, 1);
-    signatureEntry(doc, 0) // Invoke `generateEntry1` function.
-
+    // generateEntry0(doc, invoice); // Invoke `generateEntry0` function.
+    // generateEntry1(doc, invoice, 1);
+    // signatureEntry(doc, 0) // Invoke `generateEntry1` function.
     generateFooter(doc); // Invoke `generateFooter` function.
 
     doc.end();
