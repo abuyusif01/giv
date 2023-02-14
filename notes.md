@@ -16,14 +16,14 @@
 5. prices, currency, price_type [cif, fob] [_price]
 6. unit/container [_container]
 7. no of container [_ncontainer]
-8. total cost (currency) [_currency]
+8. total cost (currency) [_tcost]
 9. total amount [_price * _ncontainer]
 
 
 # Entry [2]
 
 1. payment [deposit_value]
-2. delivery
+2. delivery [_delivery]
 3. account number
 4. bank name
 5. bank branch location
