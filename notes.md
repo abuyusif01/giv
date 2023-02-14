@@ -28,3 +28,21 @@
 4. bank name
 5. bank branch location
 6. bank swift code
+
+
+# random stuff
+
+invoice number incremental
+total cost can be calculate = 22.10 * 1337 
+
+9897_AbubakarAbubakarYusif_COOKINGOIL_BALDE.pdf
+tcost = 29,547.7
+deposite = 10000
+
+x1 = tcost/deposite * 10
+x2 = deposite
+x3 = 100 - x1
+
+x1, x2, x3
+
+

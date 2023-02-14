@@ -1,9 +1,21 @@
 const express = require('express');
+const msql = require('mysql');
+const dotenv = require('dotenv');
 const session = require("express-session");
 const path = require("path");
 
 
 const { createInvoice } = require('./pdfGenerator.js');
+
+dotenv.config();
+
+const connection = msql.createConnection({
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASS,
+    database: process.env.DB_NAME
+});
+
 
 const app = express();
 app.use(
@@ -39,7 +51,7 @@ app.get('/', (req, res) => {
 //  route for submit form
 app.post('/submit', (req, res) => {
     console.log(req.body);
-    createInvoice(req.body, './static/pdf/invoice.pdf');
+    createInvoice(req.body, './static/pdf/invoice.pdf', connection);
 
     res.send("success");
 });

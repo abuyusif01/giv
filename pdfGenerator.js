@@ -1,6 +1,8 @@
 const fs = require('fs');
-const { moveDown } = require('pdfkit');
 const PDFDocument = require('pdfkit-table');
+const converter = require('number-to-words');
+const { table } = require('console');
+const { deprecate } = require('util');
 
 
 const normalFont = 'Times-Roman';
@@ -36,6 +38,47 @@ const currency_map = {
     "PHP": "₱",
 }
 
+const banks_info = {
+    "EUR": {
+
+        "BENEFICIARY": "GLOBAL INTELLECT VENTURES SDN BHD",
+        "ACCOUNT NUMBER": "873194813507",
+        "BANK NAME": "STANDARD CHARTERED BANK MALAYSIA BERHAD",
+        "BRANCH": "SCB JALAN IPOH NO. 33-35 JALAN IPOH, GF, 51200 KUALA LUMPUR",
+        "SWIFT CODE": "SCBLMYKXXXX",
+    },
+    "USD": {
+        "BENEFICIARY": "GLOBAL INTELLECT VENTURES SDN BHD",
+        "ACCOUNT NUMBER": "701-1507818",
+        "BANK NAME": "OCBC BANK MALAYSIA BERHAD",
+        "BRANCH": "MENARA OCBC, NO 18, JALAN TUN PERAK, 50050 KUALA LUMPUR",
+        "SWIFT CODE": "OCBCMYKLXXX",
+    },
+
+}
+var db_col = {
+    "name": '',
+    "addr": '',
+    "tel": '',
+    "email": '',
+    "inumber": '',
+    "product": '',
+    "size": '',
+    "price": '',
+    "ucontainer": '',
+    "ncontainer": '',
+    "depo": '',
+    "currency": '',
+    "delivery": '',
+    "tcost": '',
+    "beneficiary": '',
+    "accno": '',
+    "bankname": '',
+    "branch": '',
+    "swift": '',
+    "date": '',
+}
+
 const date = new Date();
 let day = date.getDate();
 let month = date.getMonth() + 1;
@@ -45,7 +88,6 @@ let currentDate = `${day < 10 ? "0" + day : day}-${month < 10 ? "0" + month : mo
 
 
 const generateEntry0 = (doc, invoice) => {
-
 
     doc.fontSize(12).font('Times-Bold')
         .text(invoice._name.toUpperCase(), 30, 120, { align: 'left' }) // name
@@ -57,13 +99,18 @@ const generateEntry0 = (doc, invoice) => {
 
 }
 
-const generateEntry1 = (doc, invoice, x = 0) => {
+const generateEntry1 = (doc, invoice, section, section_number, x = 0) => {
+
+    let text = ""
+    section == "sc" ?
+        text = `SC/${section_number}/${month < 10 ? "0" + month : month}/${year}` :
+        text = `PI/${section_number}/${month < 10 ? "0" + month : month}/${year}`
 
     doc.fontSize(10).font('Times-Roman');
     doc
         .moveDown(5.5).fontSize(14)
         .font('Times-Bold')
-        .text("PROFOMA INVOICE: " + `PI/${invoice._inumber}/${month < 10 ? "0" + month : month}/${year}`, {
+        .text("PROFOMA INVOICE: " + `${text}`, {
             underline: true,
             align: 'center',
         }).moveDown(0.5); // title for secion 1
@@ -72,7 +119,7 @@ const generateEntry1 = (doc, invoice, x = 0) => {
         .lineTo(doc.page.width - 25, doc.y)
         .stroke().moveDown(0.7);
 
-
+    let _tcost = invoice._price * invoice._ucontainer;
     const tableJson = {
         "headers": [
 
@@ -110,18 +157,16 @@ const generateEntry1 = (doc, invoice, x = 0) => {
         ],
         "datas": [
             {
-
                 "_product": invoice._product.replaceAll(", ", "\n").replaceAll(",", "\n"),
                 "_size": invoice._size,
                 "_price": invoice._price,
                 "_ucontainer": invoice._ucontainer,
                 "_ncontainer": invoice._ncontainer,
-                "_tcost": `bold: ${currency_map[invoice._currency]} ${invoice._tcost}`,
+                "_tcost": `bold: ${currency_map[invoice._currency] || "$"} ${Intl.NumberFormat('en-US').format(_tcost)}`,
             },
 
             {
-                "_product": "bold:TOTAL AMOUNT",
-                "_tcost": `bold: ${currency_map[invoice._currency]} ${invoice._tcost}`,
+                "_tcost": `bold: ${currency_map[invoice._currency] || "$"} ${Intl.NumberFormat('en-US').format(_tcost)}`,
             }
 
         ],
@@ -173,9 +218,22 @@ const generateEntry1 = (doc, invoice, x = 0) => {
                     .stroke();
             }
 
+            if (indexRow === 1 && indexColumn === 0) {
+                doc.
+                    font("Helvetica-Bold").
+                    text(`TOTAL: ${converter.toWords(parseInt(_tcost))
+                        .toUpperCase()} ${"(" + invoice._currency + ")"}`,
+                        x + 5,
+                        y + height - 15,
+                        {
+                            align: 'left'
+                        }
+                    )
+            }
 
             doc.font("Helvetica").fontSize(8);
             indexColumn === 0 && doc.addBackground(rectRow, '#F2F2F2', 0.15);
+
         },
     });
 
@@ -194,10 +252,26 @@ const generateEntry1 = (doc, invoice, x = 0) => {
             .text(`1) Buyer to sign acceptance and return signed contract to Seller within 48 hours of the issue date. Once confirmed, this contract cannot be cancelled or altered.\n2) All local charges at destination including demurrages, detention, clearing, transportation, duties, taxes etc. to be paid by the Buyer at their cost.\n3) Weight, quantity and technical parameters declared by manufacturer is final. Any claim on quantity/weight variation is permissible only if supported by an internationally accredited surveyor report.\n4) If any Pre-shipment inspection is required by the Buyer/Destination country, Buyer has to bear the applicable costs & notify Seller within 7 working days from the date of this Contract; else it will be deemed that no Inspection is required for this Contract.\n5) For FOB shipment, Buyer will provide forwarder or shipping line nomination within 10 days from the date of this contract. \n6) For FOB shipment, if Vessel booking is not received within 3 working days of seller's notification of cargo readiness, seller will have the right to nominateany shipping line of his choice and charge relevant freight to Buyer.\n7) The title/ownership of the goods covered by this contract will pass to Buyer when Seller has received full payment. Notwithstanding such retention of title, risk of loss shall pass from Seller to Buyer according to the trade term agreed as per INCOTERMS 2010 and amendments thereupon. Seller will assume no further responsibility or cost once the title has been passed on to Buyer.\n8) Buyer to notify visible quality defects within defects within 15 days of the cargo arrival at destination port, supported by an internationally accredited surveyor. Any dispute or claim cannot be used to hold or refuse payment for this contract.\n9) The Seller will not be liable for any indirect or consequential loss sustained by the Buyer and claim value (if cargo is insured) shall not exceed the total invoice value of the contract.\n10) If the Buyer fails to perform as per the Contract terms, Seller reserves the right to recall or resell the cargo without further approval from the buyer. Any advance payment received under this contract will be utilized by seller to offset the losses or costs incurred therein.\n11) This contract is subject to ICC Force Majeure Clause 2003 and any change in Government policy that may affect execution of this contract will be accepted by Buyer.\n12) Any dispute that cannot be settled mutually will be referred to the Malaysia Arbitration Centre subject to its rules and Malaysia laws.\n13) This Contract will be deemed accepted by the buyer even if the signed copy is not received but the advance payment or the L/C has been received by Seller.`, { align: 'left' })
 }
 
-const generateEntry2 = (doc, entry2) => {
+const generateEntry2 = (doc, invoice) => {
+    let _tcost = invoice._price * invoice._ucontainer;
+    let x1 = parseInt(_tcost / invoice._depo * 10)
+    let x2 = parseInt(invoice._depo)
+    let x3 = parseInt(100 - x1)
+
+    let dx1 = parseInt(invoice._delivery.split(",")[0] || 1)
+    let dx2 = parseInt(invoice._delivery.split(",")[1] || 0)
+
+    let dxfinal = dx2 ? dx1 + " - " + dx2 + " WEEK(s)" : dx1 + " WEEK(s)"
+    let _currency = invoice._currency in currency_map ? invoice._currency : "USD"
+
+    let beneficiary = banks_info[_currency]["BENEFICIARY"]
+    let account_number = banks_info[_currency]["ACCOUNT NUMBER"]
+    let bank_name = banks_info[_currency]["BANK NAME"]
+    let brank = banks_info[_currency]["BRANCH"]
+    let swift_code = banks_info[_currency]["SWIFT CODE"]
+
     doc
         .moveDown(2)
-
         .fontSize(12)
         .font('Helvetica')
         .fillColor('black')
@@ -226,31 +300,31 @@ const generateEntry2 = (doc, entry2) => {
             },
             {
                 "_tcname": "PAYMENT",
-                "_tcvalue": "X% DEPOSIT (X% DEPOSIT AMOUNT) & X% BALANCE TO BE PAID AFTER RECEIVING BL COPY BY EMAIL/FAX",
+                "_tcvalue": `${x1}% DEPOSIT ( ${invoice._currency} ${x2} ) & ${x3}% BALANCE TO BE PAID AFTER RECEIVING BL COPY BY EMAIL/FAX`,
             },
             {
                 "_tcname": "DELIVERY",
-                "_tcvalue": "X-X WEEKS FROM THE DATE WE RECEIVED THE DEPOSIT",
+                "_tcvalue": `${dxfinal} FROM THE DATE WE RECEIVED THE DEPOSIT`,
             },
             {
-                "_tcname": "bold:BENEFICIARY",
-                "_tcvalue": "bold:Free product",
+                "_tcname": `bold:BENEFICIARY`,
+                "_tcvalue": `bold:${beneficiary}`,
             },
             {
                 "_tcname": "bold:ACCOUNT NUMBER ",
-                "_tcvalue": "bold:Free product",
+                "_tcvalue": `bold:${account_number}`,
             },
             {
                 "_tcname": "bold:BANK NAME ",
-                "_tcvalue": "bold:Free product",
+                "_tcvalue": `bold:${bank_name}`,
             },
             {
                 "_tcname": "bold:BRANCH ",
-                "_tcvalue": "bold:Free product",
+                "_tcvalue": `bold:${brank}`,
             },
             {
                 "_tcname": "bold:SWIFT CODE ",
-                "_tcvalue": "bold:Free product",
+                "_tcvalue": `bold:${swift_code}`,
             }
         ],
     };
@@ -324,25 +398,34 @@ const generateFooter = (doc) => {
 }
 
 
-const createInvoice = (invoice, path) => {
+const createInvoice = (invoice, path, connection) => {
     let doc = new PDFDocument({
         margin: pdfConfig.margin,
         size: pdfConfig.paperSize,
         font: pdfConfig.font,
     });
 
-    generateHeader(doc); // Invoke `generateHeader` function.
+    let test = connection.query(`SELECT * FROM invoice WHERE inumber = 1`, (err, result) => {
+        if (err) {
+            console.log(err);
+        } else {
+            console.log(result);
+        }
+    });
 
+
+    // db connection to store sutff in it
+    generateHeader(doc); // Invoke `generateHeader` function.
     generateEntry0(doc, invoice); // Invoke `generateEntry0` function.
-    generateEntry1(doc, invoice); // Invoke `generateEntry1` function.
+    generateEntry1(doc, invoice, "pi", 9897); // Invoke `generateEntry1` function.
     generateEntry2(doc, invoice); // Invoke `generateEntry2` function.
     generateFooter(doc); // Invoke `generateFooter` function.
 
     doc.addPage();
     generateHeader(doc);
-    // generateEntry0(doc, invoice); // Invoke `generateEntry0` function.
-    // generateEntry1(doc, invoice, 1);
-    // signatureEntry(doc, 0) // Invoke `generateEntry1` function.
+    generateEntry0(doc, invoice); // Invoke `generateEntry0` function.
+    generateEntry1(doc, invoice, "sc", 9897, 1);
+    signatureEntry(doc, 0) // Invoke `generateEntry1` function.
     generateFooter(doc); // Invoke `generateFooter` function.
 
     doc.end();
@@ -358,3 +441,41 @@ module.exports = {
     createInvoice,
     pdfConfig
 }
+
+// {
+//     _name: 'Abubakar Abubakar Yusif',
+//     _addr: 'Dawanau Dawakin Tofa',
+//     _tel: '01139997142',
+//     _email: 'abuyusif01@gmail.com',
+//     _inumber: '9897',
+//     _product: 'RICE CHICKEN, HEXA, MODALITER',
+//     _size: '20L WHITE JERRY CAN',
+//     _price: '22.10',
+//     _ucontainer: '1337',
+//     _ncontainer: '40',
+//     _depo: '10000',
+//     _currency: 'EUR',
+//     _delivery: '2'
+//   }
+
+
+// create table invoice(
+//     inumber int not null auto_increment,
+//     name varchar(255),
+//     addr varchar(255),
+//     tel varchar(255),
+//     email varchar(255),
+//     product varchar(255),
+//     size varchar(255),
+//     price varchar(255),
+//     ucontainer varchar(255),
+//     ncontainer varchar(255),
+//     depo varchar(255),
+//     currency varchar(255),
+//     delivery varchar(255),
+//     seller varchar(255) not null,
+//     primary key (inumber)
+// );
+
+// insert dummy in it
+
