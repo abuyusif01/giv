@@ -40,14 +40,14 @@ const banks_info = {
     "EUR": {
 
         "BENEFICIARY": "GLOBAL INTELLECT VENTURES SDN BHD",
-        "ACCOUNT NUMBER": "873194813507",
+        "ACCOUNT NUMBER": "873194813507 (EURO ACCOUNT)",
         "BANK NAME": "STANDARD CHARTERED BANK MALAYSIA BERHAD",
         "BRANCH": "SCB JALAN IPOH NO. 33-35 JALAN IPOH, GF, 51200 KUALA LUMPUR",
         "SWIFT CODE": "SCBLMYKXXXX",
     },
     "USD": {
         "BENEFICIARY": "GLOBAL INTELLECT VENTURES SDN BHD",
-        "ACCOUNT NUMBER": "701-1507818",
+        "ACCOUNT NUMBER": "701-1507818 (USD ACCOUNT)",
         "BANK NAME": "OCBC BANK MALAYSIA BERHAD",
         "BRANCH": "MENARA OCBC, NO 18, JALAN TUN PERAK, 50050 KUALA LUMPUR",
         "SWIFT CODE": "OCBCMYKLXXX",
@@ -254,9 +254,11 @@ const generateEntry1 = (doc, invoice, section, section_number, x = 0) => {
 
 const generateEntry2 = (doc, invoice) => {
     _tcost = invoice._price * invoice._ucontainer;
-    let x1 = parseInt(_tcost / invoice._depo * 10)
-    let x2 = parseInt(invoice._depo)
+    let x1 = parseInt(invoice._depo)
+    let x2 = parseFloat(_tcost * x1 / 100).toFixed(2)
     let x3 = parseInt(100 - x1)
+
+
 
     let dx1 = parseInt(invoice._delivery.split(",")[0] || 1)
     let dx2 = parseInt(invoice._delivery.split(",")[1] || 0)
@@ -377,7 +379,7 @@ const signatureEntry = (doc, x = 1) => {
         .fontSize(10)
         .font('Helvetica-Bold')
         .fillColor('black')
-        .text("SELLER: ", 300, doc.page.height - 105, { align: 'center' })
+        .text("BUYER: ", 300, doc.page.height - 105, { align: 'center' })
 }
 
 const generateFooter = (doc) => {
@@ -432,7 +434,7 @@ const createInvoice = async (invoice, connection, res) => {
         let x = invoice._inumber.length // if invoice._inumber is not defined then it will throw an error
         var path = `./static/pdf/${invoice._inumber}_${invoice._name}_${invoice._product}_${invoice._seller}.pdf`;
         doc.pipe(fs.createWriteStream(path));
-        await sleep(1000);
+        await sleep(500);
         await res.download(path)
 
     } catch (error) {
@@ -442,7 +444,7 @@ const createInvoice = async (invoice, connection, res) => {
             var _inumber = result[0]._inumber;
             var path = `./static/pdf/${_inumber}_${invoice._name}_${invoice._product}_${invoice._seller}.pdf`;
             doc.pipe(fs.createWriteStream(path));
-            await sleep(1000);
+            await sleep(500);
             await res.download(path);
         })
     }
