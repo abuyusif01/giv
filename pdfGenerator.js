@@ -119,7 +119,7 @@ const generateEntry1 = (doc, invoice, section, section_number, x = 0) => {
         .lineTo(doc.page.width - 25, doc.y)
         .stroke().moveDown(0.7);
 
-    _tcost = parseFloat(invoice._price) * parseFloat(invoice._ucontainer);
+    _tcost = parseFloat(invoice._price * invoice._ucontainer * invoice._ncontainer).toFixed(2);
     const tableJson = {
         "headers": [
 
