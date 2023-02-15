@@ -345,8 +345,6 @@ const generateEntry2 = (doc, invoice) => {
             indexColumn === 0 && doc.addBackground(rectRow, 'white', 0.15);
         },
     });
-    signatureEntry(doc);
-
 }
 
 
@@ -407,28 +405,27 @@ const createInvoice = async (invoice, connection, res) => {
         font: pdfConfig.font,
     });
 
-    console.log(invoice);
+    let sql = "SELECT _inumber FROM invoice WHERE _inumber=(SELECT MAX(_inumber) FROM invoice);"
+    connection.query(sql, function (err, result) {
+        if (err) throw err;
+        generateHeader(doc); // Invoke `generateHeader` function.
+        generateEntry0(doc, invoice); // Invoke `generateEntry0` function.
+        generateEntry1(doc, invoice, "pi", result[0]._inumber); // Invoke `generateEntry1` function.
+        generateEntry2(doc, invoice);
+        signatureEntry(doc)
+        generateFooter(doc);
 
-    // db connection to store sutff in it
-    generateHeader(doc); // Invoke `generateHeader` function.
-    generateEntry0(doc, invoice); // Invoke `generateEntry0` function.
-    generateEntry1(doc, invoice, "pi", 9897); // Invoke `generateEntry1` function.
-    generateEntry2(doc, invoice); // Invoke `generateEntry2` function.
-    generateFooter(doc); // Invoke `generateFooter` function.
+        doc.addPage();
+        generateHeader(doc);
+        generateEntry0(doc, invoice); // Invoke `generateEntry0` function.
+        generateEntry1(doc, invoice, "sc", result[0]._inumber, 1);
+        signatureEntry(doc, 0) // Invoke `generateEntry1` function.
+        generateFooter(doc); // Invoke `generateFooter` function.
+        doc.end();
 
-    doc.addPage();
-    generateHeader(doc);
-    generateEntry0(doc, invoice); // Invoke `generateEntry0` function.
-    generateEntry1(doc, invoice, "sc", 9897, 1);
-    signatureEntry(doc, 0) // Invoke `generateEntry1` function.
-    generateFooter(doc); // Invoke `generateFooter` function.
-
-    doc.end();
+    });
 
     insertInvoice(invoice, connection);
-
-    sql = "SELECT _inumber FROM invoice WHERE _inumber=(SELECT MAX(_inumber) FROM invoice);"
-
 
     try {
         let x = invoice._inumber.length // if invoice._inumber is not defined then it will throw an error
