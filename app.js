@@ -5,7 +5,7 @@ const session = require("express-session");
 const path = require("path");
 
 
-const { createInvoice } = require('./pdfGenerator.js');
+const { createInvoice, retrievInvoice } = require('./pdfGenerator.js');
 
 dotenv.config();
 
@@ -40,10 +40,6 @@ app.use(express.static(path.join(__dirname, "static/js")));
 app.use(express.json());
 
 
-
-
-
-
 app.get('/', (req, res) => {
     res.sendFile(__static_html + '/index.html');
 });
@@ -51,8 +47,19 @@ app.get('/', (req, res) => {
 //  route for submit form
 app.post('/submit', (req, res) => {
     console.log(req.body);
-    createInvoice(req.body, './static/pdf/invoice.pdf', connection);
+    createInvoice(req.body, connection);
+    res.send("success");
+});
 
+
+app.get('/retrieve', (req, res) => {
+    res.sendFile(__static_html + '/retrieve.html');
+});
+
+
+app.post('/retrieve', async (req, res) => {
+    
+    await retrievInvoice(parseInt(req.body._inumber) || 1, connection)
     res.send("success");
 });
 

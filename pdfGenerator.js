@@ -1,12 +1,9 @@
 const fs = require('fs');
 const PDFDocument = require('pdfkit-table');
 const converter = require('number-to-words');
-const { table } = require('console');
-const { deprecate } = require('util');
-
 
 const normalFont = 'Times-Roman';
-
+var _tcost = 0;
 
 const pdfConfig = {
     margin: 30,
@@ -57,11 +54,11 @@ const banks_info = {
 
 }
 var db_col = {
+    "inumber": '',
     "name": '',
     "addr": '',
     "tel": '',
     "email": '',
-    "inumber": '',
     "product": '',
     "size": '',
     "price": '',
@@ -71,12 +68,8 @@ var db_col = {
     "currency": '',
     "delivery": '',
     "tcost": '',
-    "beneficiary": '',
-    "accno": '',
-    "bankname": '',
-    "branch": '',
-    "swift": '',
     "date": '',
+    "swiftcode": '',
 }
 
 const date = new Date();
@@ -119,7 +112,7 @@ const generateEntry1 = (doc, invoice, section, section_number, x = 0) => {
         .lineTo(doc.page.width - 25, doc.y)
         .stroke().moveDown(0.7);
 
-    let _tcost = invoice._price * invoice._ucontainer;
+    _tcost = parseFloat(invoice._price) * parseFloat(invoice._ucontainer);
     const tableJson = {
         "headers": [
 
@@ -253,7 +246,7 @@ const generateEntry1 = (doc, invoice, section, section_number, x = 0) => {
 }
 
 const generateEntry2 = (doc, invoice) => {
-    let _tcost = invoice._price * invoice._ucontainer;
+    _tcost = invoice._price * invoice._ucontainer;
     let x1 = parseInt(_tcost / invoice._depo * 10)
     let x2 = parseInt(invoice._depo)
     let x3 = parseInt(100 - x1)
@@ -398,21 +391,14 @@ const generateFooter = (doc) => {
 }
 
 
-const createInvoice = (invoice, path, connection) => {
+const createInvoice = (invoice, connection) => {
     let doc = new PDFDocument({
         margin: pdfConfig.margin,
         size: pdfConfig.paperSize,
         font: pdfConfig.font,
     });
 
-    let test = connection.query(`SELECT * FROM invoice WHERE inumber = 1`, (err, result) => {
-        if (err) {
-            console.log(err);
-        } else {
-            console.log(result);
-        }
-    });
-
+    console.log(invoice);
 
     // db connection to store sutff in it
     generateHeader(doc); // Invoke `generateHeader` function.
@@ -429,18 +415,72 @@ const createInvoice = (invoice, path, connection) => {
     generateFooter(doc); // Invoke `generateFooter` function.
 
     doc.end();
-    doc.pipe(fs.createWriteStream(path));
+
+    insertInvoice(invoice, connection);
+
+    sql = "SELECT _inumber FROM invoice WHERE _inumber=(SELECT MAX(_inumber) FROM invoice);"
+
+
+    try {
+        let x = invoice._inumber.length // if invoice._inumber is not defined then it will throw an error
+        var path = `./static/pdf/${invoice._inumber}_${invoice._name}_${invoice._product}_${invoice._seller}.pdf`;
+        doc.pipe(fs.createWriteStream(path));
+
+    } catch (error) {
+
+        connection.query(sql, (err, result) => {
+            if (err) throw err;
+            var _inumber = result[0]._inumber;
+            var path = `./static/pdf/${_inumber}_${invoice._name}_${invoice._product}_${invoice._seller}.pdf`;
+            doc.pipe(fs.createWriteStream(path));
+        })
+    }
 }
 
-module.exports = {
-    generateEntry0,
-    generateEntry1,
-    generateEntry2,
-    generateHeader,
-    generateFooter,
-    createInvoice,
-    pdfConfig
+
+const insertInvoice = async (invoice, connection) => {
+    const {
+        _name,
+        _addr,
+        _tel,
+        _email,
+        _product,
+        _size,
+        _price,
+        _ucontainer,
+        _ncontainer,
+        _depo,
+        _delivery,
+        _seller,
+    } = invoice;
+
+    let _currency = invoice._currency in currency_map ? invoice._currency : "USD"
+    let _swiftcode = banks_info[_currency]["SWIFT CODE"]
+    let _date = currentDate;
+    _tcost = invoice._price * invoice._ucontainer;
+
+    let sql = `INSERT INTO invoice (_name, _addr, _tel, _email, _product, _size, _price, _ucontainer, _ncontainer, _depo, _delivery, _currency, _swiftcode, _tcost, _seller, _date) VALUES ('${_name}', '${_addr}', '${_tel}', '${_email}', '${_product}', '${_size}', '${_price}', '${_ucontainer}', '${_ncontainer}', '${_depo}', '${_delivery}', '${_currency}', '${_swiftcode}', '${_tcost}', '${_seller}', '${_date}')`;
+
+    connection.query(sql, (err, result) => {
+        if (err) {
+            return;
+        }
+    });
 }
+
+
+const retrievInvoice = async (inumber, connection) => {
+    let sql = `SELECT * FROM invoice WHERE _inumber = ${inumber}`;
+    var results;
+    connection.query(sql, (err, result) => {
+        if (err) {
+            console.log(err);
+        } else {
+            createInvoice(result[0], connection);
+        }
+    });
+}
+
 
 // {
 //     _name: 'Abubakar Abubakar Yusif',
@@ -459,23 +499,34 @@ module.exports = {
 //   }
 
 
-// create table invoice(
-//     inumber int not null auto_increment,
-//     name varchar(255),
-//     addr varchar(255),
-//     tel varchar(255),
-//     email varchar(255),
-//     product varchar(255),
-//     size varchar(255),
-//     price varchar(255),
-//     ucontainer varchar(255),
-//     ncontainer varchar(255),
-//     depo varchar(255),
-//     currency varchar(255),
-//     delivery varchar(255),
-//     seller varchar(255) not null,
-//     primary key (inumber)
+// CREATE TABLE invoice (
+//     _inumber INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+//     _name VARCHAR(255), 
+//     _addr VARCHAR(255), 
+//     _tel VARCHAR(255), 
+//     _email VARCHAR(255), 
+//     _product VARCHAR(255), 
+//     _size VARCHAR(255), 
+//     _price VARCHAR(255), 
+//     _ucontainer VARCHAR(255), 
+//     _ncontainer VARCHAR(255), 
+//     _depo VARCHAR(255), 
+//     _currency VARCHAR(255), 
+//     _delivery VARCHAR(255), 
+//     _tcost VARCHAR(255), 
+//     _date VARCHAR(255), 
+//     _swiftcode VARCHAR(255),
+//     _seller VARCHAR(255) 
 // );
 
-// insert dummy in it
-
+module.exports = {
+    generateEntry0,
+    generateEntry1,
+    generateEntry2,
+    generateHeader,
+    generateFooter,
+    createInvoice,
+    pdfConfig,
+    insertInvoice,
+    retrievInvoice,
+}
