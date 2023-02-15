@@ -5,7 +5,7 @@ const session = require("express-session");
 const path = require("path");
 
 
-const { createInvoice, retrievInvoice } = require('./pdfGenerator.js');
+const { createInvoice, retrievInvoice, storage } = require('./pdfGenerator.js');
 
 dotenv.config();
 
@@ -45,10 +45,8 @@ app.get('/', (req, res) => {
 });
 
 //  route for submit form
-app.post('/submit', (req, res) => {
-    console.log(req.body);
-    createInvoice(req.body, connection);
-    res.send("success");
+app.post('/submit', async (req, res) => {
+    await createInvoice(req.body, connection, res);
 });
 
 
@@ -58,10 +56,9 @@ app.get('/retrieve', (req, res) => {
 
 
 app.post('/retrieve', async (req, res) => {
-    
-    await retrievInvoice(parseInt(req.body._inumber) || 1, connection)
-    res.send("success");
+    await retrievInvoice(parseInt(req.body._inumber) || 1, connection, res)
 });
+
 
 app.listen(3000, () => {
     console.log('Listening on port 3000');

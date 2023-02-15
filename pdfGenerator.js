@@ -5,6 +5,7 @@ const converter = require('number-to-words');
 const normalFont = 'Times-Roman';
 var _tcost = 0;
 
+var storage = {};
 const pdfConfig = {
     margin: 30,
     font: "Times-Roman",
@@ -80,6 +81,11 @@ let currentDate = `${day < 10 ? "0" + day : day}-${month < 10 ? "0" + month : mo
 
 
 
+const sleep = (milliseconds) => {
+    return new Promise(resolve => setTimeout(resolve, milliseconds))
+}
+
+
 const generateEntry0 = (doc, invoice) => {
 
     doc.fontSize(12).font('Times-Bold')
@@ -91,6 +97,7 @@ const generateEntry0 = (doc, invoice) => {
         .text("DATE: " + currentDate, 0, 125, { align: 'right' }) // date
 
 }
+
 
 const generateEntry1 = (doc, invoice, section, section_number, x = 0) => {
 
@@ -391,7 +398,7 @@ const generateFooter = (doc) => {
 }
 
 
-const createInvoice = (invoice, connection) => {
+const createInvoice = async (invoice, connection, res) => {
     let doc = new PDFDocument({
         margin: pdfConfig.margin,
         size: pdfConfig.paperSize,
@@ -425,14 +432,18 @@ const createInvoice = (invoice, connection) => {
         let x = invoice._inumber.length // if invoice._inumber is not defined then it will throw an error
         var path = `./static/pdf/${invoice._inumber}_${invoice._name}_${invoice._product}_${invoice._seller}.pdf`;
         doc.pipe(fs.createWriteStream(path));
+        await sleep(1000);
+        await res.download(path)
 
     } catch (error) {
 
-        connection.query(sql, (err, result) => {
+        connection.query(sql, async (err, result) => {
             if (err) throw err;
             var _inumber = result[0]._inumber;
             var path = `./static/pdf/${_inumber}_${invoice._name}_${invoice._product}_${invoice._seller}.pdf`;
             doc.pipe(fs.createWriteStream(path));
+            await sleep(1000);
+            await res.download(path);
         })
     }
 }
@@ -469,35 +480,17 @@ const insertInvoice = async (invoice, connection) => {
 }
 
 
-const retrievInvoice = async (inumber, connection) => {
+const retrievInvoice = async (inumber, connection, res) => {
     let sql = `SELECT * FROM invoice WHERE _inumber = ${inumber}`;
     var results;
     connection.query(sql, (err, result) => {
         if (err) {
             console.log(err);
         } else {
-            createInvoice(result[0], connection);
+            createInvoice(result[0], connection, res);
         }
     });
 }
-
-
-// {
-//     _name: 'Abubakar Abubakar Yusif',
-//     _addr: 'Dawanau Dawakin Tofa',
-//     _tel: '01139997142',
-//     _email: 'abuyusif01@gmail.com',
-//     _inumber: '9897',
-//     _product: 'RICE CHICKEN, HEXA, MODALITER',
-//     _size: '20L WHITE JERRY CAN',
-//     _price: '22.10',
-//     _ucontainer: '1337',
-//     _ncontainer: '40',
-//     _depo: '10000',
-//     _currency: 'EUR',
-//     _delivery: '2'
-//   }
-
 
 // CREATE TABLE invoice (
 //     _inumber INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -529,4 +522,6 @@ module.exports = {
     pdfConfig,
     insertInvoice,
     retrievInvoice,
+    storage,
+    sleep
 }
