@@ -438,12 +438,7 @@ const createInvoice = async (invoice, connection, res) => {
             doc.end();
             insertInvoice(invoice, connection);
         } catch (error) {
-            await res.send("Invoice Number is not defined. Please contact the administrator. <script>console.log('helo')</script>")
-            const restart = spawn('npm', ['run', 'start'], {
-                detached: true,
-                stdio: 'inherit'
-            });
-            restart.unref();
+            await res.send("Invoice Number is not defined. Please contact the administrator.")
         }
 
     });
