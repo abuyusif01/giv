@@ -254,7 +254,7 @@ const generateEntry1 = (doc, invoice, section, section_number, x = 0) => {
 }
 
 const generateEntry2 = (doc, invoice) => {
-    _tcost = invoice._price * invoice._ucontainer;
+    _tcost = invoice._price * invoice._ucontainer * invoice._ncontainer;
     let x1 = parseInt(invoice._depo)
     let x2 = parseFloat(_tcost * x1 / 100).toFixed(2)
     let x3 = parseInt(100 - x1)
