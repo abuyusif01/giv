@@ -1,6 +1,7 @@
 const fs = require('fs');
 const PDFDocument = require('pdfkit-table');
 const converter = require('number-to-words');
+const { spawn } = require('child_process');
 
 const normalFont = 'Times-Roman';
 var _tcost = 0;
@@ -407,25 +408,36 @@ const createInvoice = async (invoice, connection, res) => {
 
     let sql = "SELECT _inumber FROM invoice WHERE _inumber=(SELECT MAX(_inumber) FROM invoice);"
     connection.query(sql, function (err, result) {
-        if (err) throw err;
-        generateHeader(doc); // Invoke `generateHeader` function.
-        generateEntry0(doc, invoice); // Invoke `generateEntry0` function.
-        generateEntry1(doc, invoice, "pi", result[0]._inumber); // Invoke `generateEntry1` function.
-        generateEntry2(doc, invoice);
-        signatureEntry(doc)
-        generateFooter(doc);
 
-        doc.addPage();
-        generateHeader(doc);
-        generateEntry0(doc, invoice); // Invoke `generateEntry0` function.
-        generateEntry1(doc, invoice, "sc", result[0]._inumber, 1);
-        signatureEntry(doc, 0) // Invoke `generateEntry1` function.
-        generateFooter(doc); // Invoke `generateFooter` function.
-        doc.end();
+        try {
+            if (err) throw err;
+            generateHeader(doc); // Invoke `generateHeader` function.
+            generateEntry0(doc, invoice); // Invoke `generateEntry0` function.
+            generateEntry1(doc, invoice, "pi", result[0]._inumber); // Invoke `generateEntry1` function.
+            generateEntry2(doc, invoice);
+            signatureEntry(doc)
+            generateFooter(doc);
+
+            doc.addPage();
+            generateHeader(doc);
+            generateEntry0(doc, invoice); // Invoke `generateEntry0` function.
+            generateEntry1(doc, invoice, "sc", result[0]._inumber, 1);
+            signatureEntry(doc, 0) // Invoke `generateEntry1` function.
+            generateFooter(doc); // Invoke `generateFooter` function.
+            doc.end();
+            insertInvoice(invoice, connection);
+        } catch (error) {
+            const restart = spawn('npm', ['run', 'start'], {
+                detached: true,
+                stdio: 'inherit'
+            });
+            restart.unref();
+
+
+        }
 
     });
 
-    insertInvoice(invoice, connection);
 
     try {
         let x = invoice._inumber.length // if invoice._inumber is not defined then it will throw an error
