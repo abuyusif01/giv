@@ -74,18 +74,27 @@ var db_col = {
     "swiftcode": '',
 }
 
-const date = new Date();
-let day = date.getDate();
-let month = date.getMonth() + 1;
-let year = date.getFullYear();
-let currentDate = `${day < 10 ? "0" + day : day}-${month < 10 ? "0" + month : month}-${year}`;
 
+const justNumbers = (str) => {
+    return parseFloat(str.match(/[\d\.]+/))
+}
+
+
+const toCaps = (str) => {
+    return str.toUpperCase();
+}
 
 
 const sleep = (milliseconds) => {
     return new Promise(resolve => setTimeout(resolve, milliseconds))
 }
 
+
+const date = new Date();
+let day = date.getDate();
+let month = date.getMonth() + 1;
+let year = date.getFullYear();
+let currentDate = `${day < 10 ? "0" + day : day}-${month < 10 ? "0" + month : month}-${year}`;
 
 const generateEntry0 = (doc, invoice) => {
 
@@ -120,7 +129,9 @@ const generateEntry1 = (doc, invoice, section, section_number, x = 0) => {
         .lineTo(doc.page.width - 25, doc.y)
         .stroke().moveDown(0.7);
 
-    _tcost = parseFloat(invoice._price * invoice._ucontainer * invoice._ncontainer).toFixed(2);
+    _tcost = parseFloat(justNumbers(invoice._price) * justNumbers(invoice._ucontainer) * justNumbers(invoice._ncontainer)).toFixed(2);
+    isNaN(_tcost) ? _tcost = 0 : _tcost = _tcost;
+
     const tableJson = {
         "headers": [
 
@@ -158,16 +169,16 @@ const generateEntry1 = (doc, invoice, section, section_number, x = 0) => {
         ],
         "datas": [
             {
-                "_product": invoice._product.replaceAll(", ", "\n").replaceAll(",", "\n"),
-                "_size": invoice._size,
-                "_price": invoice._price,
-                "_ucontainer": invoice._ucontainer,
-                "_ncontainer": invoice._ncontainer,
-                "_tcost": `bold: ${currency_map[invoice._currency] || "$"} ${Intl.NumberFormat('en-US').format(_tcost)}`,
+                "_product": toCaps(invoice._product).replaceAll(", ", "\n").replaceAll(",", "\n"),
+                "_size": toCaps(invoice._size),
+                "_price": toCaps(invoice._price),
+                "_ucontainer": toCaps(invoice._ucontainer),
+                "_ncontainer": toCaps(invoice._ncontainer),
+                "_tcost": `bold: ${currency_map[toCaps(invoice._currency)] || "$"} ${Intl.NumberFormat('en-US').format(_tcost || 0)}`,
             },
 
             {
-                "_tcost": `bold: ${currency_map[invoice._currency] || "$"} ${Intl.NumberFormat('en-US').format(_tcost)}`,
+                "_tcost": `bold: ${currency_map[toCaps(invoice._currency)] || "$"} ${Intl.NumberFormat('en-US').format(_tcost || 0)}`,
             }
 
         ],

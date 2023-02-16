@@ -70,9 +70,9 @@
             }
             if (n == (x.length - 1)) {
                 document.getElementById("nextBtn").innerHTML = "Submit";
-                document.getElementById("nextBtn").onclick = function () {
-                    document.getElementById("regForm").submit();
-                    document.getElementById("regForm").reset();
+                document.getElementById("prevBtn").innerHTML = "Home";
+                document.getElementById("prevBtn").onclick = function () {
+                    window.location.reload();
                 }
             } else {
                 document.getElementById("nextBtn").innerHTML = "Next";
