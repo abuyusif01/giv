@@ -13,7 +13,7 @@
 
 <body>
     <form id="regForm" action="/submit" method="post">
-        
+
         <!-- One "tab" for each step in the form: -->
         <div class="tab">
             <h1> Customer Details</h1>
@@ -70,6 +70,10 @@
             }
             if (n == (x.length - 1)) {
                 document.getElementById("nextBtn").innerHTML = "Submit";
+                document.getElementById("nextBtn").onclick = function () {
+                    document.getElementById("regForm").submit();
+                    document.getElementById("regForm").reset();
+                }
             } else {
                 document.getElementById("nextBtn").innerHTML = "Next";
             }

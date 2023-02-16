@@ -407,7 +407,7 @@ const createInvoice = async (invoice, connection, res) => {
     });
 
     let sql = "SELECT _inumber FROM invoice WHERE _inumber=(SELECT MAX(_inumber) FROM invoice);"
-    connection.query(sql, function (err, result) {
+    connection.query(sql, async function (err, result) {
 
         try {
             if (err) throw err;
@@ -427,7 +427,7 @@ const createInvoice = async (invoice, connection, res) => {
             doc.end();
             insertInvoice(invoice, connection);
         } catch (error) {
-            res.send("Invoice Number is not defined. Please contact the administrator.")
+            await res.send("Invoice Number is not defined. Please contact the administrator. <script>console.log('helo')</script>")
             const restart = spawn('npm', ['run', 'start'], {
                 detached: true,
                 stdio: 'inherit'
@@ -443,7 +443,7 @@ const createInvoice = async (invoice, connection, res) => {
         var path = `./static/pdf/${invoice._inumber}_${invoice._name}_${invoice._product}_${invoice._seller}.pdf`;
         doc.pipe(fs.createWriteStream(path));
         await sleep(500);
-        await res.download(path)
+        res.download(path);
 
     } catch (error) {
 
@@ -453,10 +453,12 @@ const createInvoice = async (invoice, connection, res) => {
             var path = `./static/pdf/${_inumber}_${invoice._name}_${invoice._product}_${invoice._seller}.pdf`;
             doc.pipe(fs.createWriteStream(path));
             await sleep(500);
-            await res.download(path);
+            res.download(path);
+
         })
     }
 }
+// unit prices / CIF {destination}
 
 
 const insertInvoice = async (invoice, connection) => {
@@ -493,7 +495,6 @@ const insertInvoice = async (invoice, connection) => {
 const retrievInvoice = async (inumber, connection, res) => {
     try {
         let sql = `SELECT * FROM invoice WHERE _inumber = ${inumber}`;
-        var results;
         connection.query(sql, (err, result) => {
             if (err) {
                 console.log(err);
@@ -539,3 +540,6 @@ module.exports = {
     storage,
     sleep
 }
+
+// INSERT INTO invoice (_inumber, _name, _addr, _tel, _email, _product, _size, _price, _ucontainer, _ncontainer, _depo, _currency, _delivery, _tcost, _date, _swiftcode, _seller)
+// VALUES ('4965', 'John Doe', '123 Main St', '555-555-5555', 'johndoe@email.com', 'Widget', 'Medium', '100.00', '20ft', 'ABCD1234567', 'Los Angeles', 'USD', 'Ground', '10.00', '2023-02-16', 'ABCD1234', 'ABC Corp');
