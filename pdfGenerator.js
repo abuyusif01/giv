@@ -218,7 +218,7 @@ const generateEntry1 = (doc, invoice, section, section_number, x = 0) => {
                     .lineTo(x + width, y + height)
                     .stroke();
             }
-
+            isNaN(parseInt(_tcost)) ? _tcost = 0 : _tcost = _tcost;
             if (indexRow === 1 && indexColumn === 0) {
                 doc.
                     font("Helvetica-Bold").
@@ -241,7 +241,7 @@ const generateEntry1 = (doc, invoice, section, section_number, x = 0) => {
     x == 0 ? doc
         .font('Helvetica')
         .fontSize(10)
-        .text(`* Bank charges from customer side should be paid by customer\n* Bargaining is not allowed after the contract has been signed\n* The company is only responsible for payment made to its account in Malaysia and provide by us and customers\nare advice to double confirmed the banking details by telephone before making payment.`, { align: 'left' }) :
+        .text(`* Bank charges from customer side should be paid by customer\n * Bargaining is not allowed after the contract has been signed\n * The company is only responsible for payment made to its account in Malaysia and provide by us and customers\nare advice to double confirmed the banking details by telephone before making payment.`, { align: 'left' }) :
         doc
             .font('Helvetica-Bold')
             .fontSize(10).fillColor('black')
@@ -250,7 +250,7 @@ const generateEntry1 = (doc, invoice, section, section_number, x = 0) => {
                 underline: true,
             })
             .font('Helvetica')
-            .text(`1) Buyer to sign acceptance and return signed contract to Seller within 48 hours of the issue date. Once confirmed, this contract cannot be cancelled or altered.\n2) All local charges at destination including demurrages, detention, clearing, transportation, duties, taxes etc. to be paid by the Buyer at their cost.\n3) Weight, quantity and technical parameters declared by manufacturer is final. Any claim on quantity/weight variation is permissible only if supported by an internationally accredited surveyor report.\n4) If any Pre-shipment inspection is required by the Buyer/Destination country, Buyer has to bear the applicable costs & notify Seller within 7 working days from the date of this Contract; else it will be deemed that no Inspection is required for this Contract.\n5) For FOB shipment, Buyer will provide forwarder or shipping line nomination within 10 days from the date of this contract. \n6) For FOB shipment, if Vessel booking is not received within 3 working days of seller's notification of cargo readiness, seller will have the right to nominateany shipping line of his choice and charge relevant freight to Buyer.\n7) The title/ownership of the goods covered by this contract will pass to Buyer when Seller has received full payment. Notwithstanding such retention of title, risk of loss shall pass from Seller to Buyer according to the trade term agreed as per INCOTERMS 2010 and amendments thereupon. Seller will assume no further responsibility or cost once the title has been passed on to Buyer.\n8) Buyer to notify visible quality defects within defects within 15 days of the cargo arrival at destination port, supported by an internationally accredited surveyor. Any dispute or claim cannot be used to hold or refuse payment for this contract.\n9) The Seller will not be liable for any indirect or consequential loss sustained by the Buyer and claim value (if cargo is insured) shall not exceed the total invoice value of the contract.\n10) If the Buyer fails to perform as per the Contract terms, Seller reserves the right to recall or resell the cargo without further approval from the buyer. Any advance payment received under this contract will be utilized by seller to offset the losses or costs incurred therein.\n11) This contract is subject to ICC Force Majeure Clause 2003 and any change in Government policy that may affect execution of this contract will be accepted by Buyer.\n12) Any dispute that cannot be settled mutually will be referred to the Malaysia Arbitration Centre subject to its rules and Malaysia laws.\n13) This Contract will be deemed accepted by the buyer even if the signed copy is not received but the advance payment or the L/C has been received by Seller.`, { align: 'left' })
+            .text(`1) Buyer to sign acceptance and return signed contract to Seller within 48 hours of the issue date.Once confirmed, this contract cannot be cancelled or altered.\n2) All local charges at destination including demurrages, detention, clearing, transportation, duties, taxes etc.to be paid by the Buyer at their cost.\n3) Weight, quantity and technical parameters declared by manufacturer is final.Any claim on quantity / weight variation is permissible only if supported by an internationally accredited surveyor report.\n4) If any Pre - shipment inspection is required by the Buyer / Destination country, Buyer has to bear the applicable costs & notify Seller within 7 working days from the date of this Contract; else it will be deemed that no Inspection is required for this Contract.\n5) For FOB shipment, Buyer will provide forwarder or shipping line nomination within 10 days from the date of this contract.\n6) For FOB shipment, if Vessel booking is not received within 3 working days of seller's notification of cargo readiness, seller will have the right to nominateany shipping line of his choice and charge relevant freight to Buyer.\n7) The title/ownership of the goods covered by this contract will pass to Buyer when Seller has received full payment. Notwithstanding such retention of title, risk of loss shall pass from Seller to Buyer according to the trade term agreed as per INCOTERMS 2010 and amendments thereupon. Seller will assume no further responsibility or cost once the title has been passed on to Buyer.\n8) Buyer to notify visible quality defects within defects within 15 days of the cargo arrival at destination port, supported by an internationally accredited surveyor. Any dispute or claim cannot be used to hold or refuse payment for this contract.\n9) The Seller will not be liable for any indirect or consequential loss sustained by the Buyer and claim value (if cargo is insured) shall not exceed the total invoice value of the contract.\n10) If the Buyer fails to perform as per the Contract terms, Seller reserves the right to recall or resell the cargo without further approval from the buyer. Any advance payment received under this contract will be utilized by seller to offset the losses or costs incurred therein.\n11) This contract is subject to ICC Force Majeure Clause 2003 and any change in Government policy that may affect execution of this contract will be accepted by Buyer.\n12) Any dispute that cannot be settled mutually will be referred to the Malaysia Arbitration Centre subject to its rules and Malaysia laws.\n13) This Contract will be deemed accepted by the buyer even if the signed copy is not received but the advance payment or the L/C has been received by Seller.`, { align: 'left' })
 }
 
 const generateEntry2 = (doc, invoice) => {
@@ -427,13 +427,12 @@ const createInvoice = async (invoice, connection, res) => {
             doc.end();
             insertInvoice(invoice, connection);
         } catch (error) {
+            res.send("Invoice Number is not defined. Please contact the administrator.")
             const restart = spawn('npm', ['run', 'start'], {
                 detached: true,
                 stdio: 'inherit'
             });
             restart.unref();
-
-
         }
 
     });
