@@ -480,15 +480,19 @@ const insertInvoice = async (invoice, connection) => {
 
 
 const retrievInvoice = async (inumber, connection, res) => {
-    let sql = `SELECT * FROM invoice WHERE _inumber = ${inumber}`;
-    var results;
-    connection.query(sql, (err, result) => {
-        if (err) {
-            console.log(err);
-        } else {
-            createInvoice(result[0], connection, res);
-        }
-    });
+    try {
+        let sql = `SELECT * FROM invoice WHERE _inumber = ${inumber}`;
+        var results;
+        connection.query(sql, (err, result) => {
+            if (err) {
+                console.log(err);
+            } else {
+                createInvoice(result[0], connection, res);
+            }
+        });
+    } catch (error) {
+        res.send("Invoice not found")
+    }
 }
 
 // CREATE TABLE invoice (
