@@ -21,7 +21,11 @@ const pdfConfig = {
 
 const currency_map = {
     "USD": "$",
+    "DOLLAR": "$",
+    "$": "$",
     "EUR": "€",
+    "EURO": "€",
+    "€": "€",
     "GBP": "£",
     "INR": "₹",
     "AUD": "$",
@@ -117,13 +121,24 @@ const generateEntry1 = (doc, invoice, section, section_number, x = 0) => {
         text = `PI/${section_number}/${month < 10 ? "0" + month : month}/${year}`
 
     doc.fontSize(10).font('Times-Roman');
-    doc
-        .moveDown(5.5).fontSize(14)
-        .font('Times-Bold')
-        .text("PROFOMA INVOICE: " + `${text}`, {
-            underline: true,
-            align: 'center',
-        }).moveDown(0.5); // title for secion 1
+
+    section == "pi" ?
+
+        doc
+            .moveDown(5.5).fontSize(14)
+            .font('Times-Bold')
+            .text("PROFOMA INVOICE: " + `${text}`, {
+                underline: true,
+                align: 'center',
+            }).moveDown(0.5) :
+
+        doc
+            .moveDown(5.5).fontSize(14)
+            .font('Times-Bold')
+            .text("SALES CONTRACT: " + `${text}`, {
+                underline: true,
+                align: 'center',
+            }).moveDown(0.5)
 
     doc.moveTo(30, doc.y)
         .lineTo(doc.page.width - 25, doc.y)
@@ -364,7 +379,7 @@ const generateHeader = (doc) => {
 
     doc.image('./static/images/logo.png', pdfConfig.startPoint, 40, { width: 60 })
         .fillColor('#444444')
-        .fontSize(23).font('Times-Roman')
+        .fontSize(22).font('Times-Bold')
         .text('GLOBAL INTELLECT VENTURES SDN. BHD.', 90, 57)
         .fontSize(pdfConfig.fontSize).font('Times-Roman')
         .text('(961531-U)', 0, 75, { align: 'right' })
@@ -410,7 +425,7 @@ const generateFooter = (doc) => {
 }
 
 
-const createInvoice = async (invoice, connection, res) => {
+const createInvoice = async (invoice, connection, res, x = 0) => {
     let doc = new PDFDocument({
         margin: pdfConfig.margin,
         size: pdfConfig.paperSize,
@@ -436,9 +451,11 @@ const createInvoice = async (invoice, connection, res) => {
             signatureEntry(doc, 0) // Invoke `generateEntry1` function.
             generateFooter(doc); // Invoke `generateFooter` function.
             doc.end();
-            insertInvoice(invoice, connection);
+            x == 0 ? insertInvoice(invoice, connection) : null;
         } catch (error) {
-            await res.send("Invoice Number is not defined. Please contact the administrator.")
+
+            // await res.send("Invoice Number is not defined. Please contact the administrator.")
+            res.send(error)
         }
 
     });
@@ -464,11 +481,11 @@ const createInvoice = async (invoice, connection, res) => {
         })
     }
 }
-// unit prices / CIF {destination}
 
 
 const insertInvoice = async (invoice, connection) => {
     const {
+        _pi,
         _name,
         _addr,
         _tel,
@@ -488,24 +505,24 @@ const insertInvoice = async (invoice, connection) => {
     let _date = currentDate;
     _tcost = invoice._price * invoice._ucontainer;
 
-    let sql = `INSERT INTO invoice (_name, _addr, _tel, _email, _product, _size, _price, _ucontainer, _ncontainer, _depo, _delivery, _currency, _swiftcode, _tcost, _seller, _date) VALUES ('${_name}', '${_addr}', '${_tel}', '${_email}', '${_product}', '${_size}', '${_price}', '${_ucontainer}', '${_ncontainer}', '${_depo}', '${_delivery}', '${_currency}', '${_swiftcode}', '${_tcost}', '${_seller}', '${_date}')`;
+    let sql = `INSERT INTO invoice (_inumber, _name, _addr, _tel, _email, _product, _size, _price, _ucontainer, _ncontainer, _depo, _delivery, _currency, _swiftcode, _tcost, _seller, _date) VALUES ('${_pi}', '${_name}', '${_addr}', '${_tel}', '${_email}', '${_product}', '${_size}', '${_price}', '${_ucontainer}', '${_ncontainer}', '${_depo}', '${_delivery}', '${_currency}', '${_swiftcode}', '${_tcost}', '${_seller}', '${_date}') ON DUPLICATE KEY UPDATE _inumber='${_pi}', _name='${_name}', _addr='${_addr}', _tel='${_tel}', _email='${_email}', _product='${_product}', _size='${_size}', _price='${_price}', _ucontainer='${_ucontainer}', _ncontainer='${_ncontainer}', _depo='${_depo}', _delivery='${_delivery}', _currency='${_currency}', _swiftcode='${_swiftcode}', _tcost='${_tcost}', _seller='${_seller}', _date='${_date}'`;
 
     connection.query(sql, (err, result) => {
         if (err) {
-            return;
+            // console.log(err);
         }
     });
 }
 
 
-const retrievInvoice = async (inumber, connection, res) => {
+const retrievInvoice = async (inumber, connection, res,) => {
     try {
         let sql = `SELECT * FROM invoice WHERE _inumber = ${inumber}`;
         connection.query(sql, (err, result) => {
             if (err) {
                 console.log(err);
             } else {
-                createInvoice(result[0], connection, res);
+                createInvoice(result[0], connection, res, 1);
             }
         });
     } catch (error) {
@@ -549,3 +566,5 @@ module.exports = {
 
 // INSERT INTO invoice (_inumber, _name, _addr, _tel, _email, _product, _size, _price, _ucontainer, _ncontainer, _depo, _currency, _delivery, _tcost, _date, _swiftcode, _seller)
 // VALUES ('4965', 'John Doe', '123 Main St', '555-555-5555', 'johndoe@email.com', 'Widget', 'Medium', '100.00', '20ft', 'ABCD1234567', 'Los Angeles', 'USD', 'Ground', '10.00', '2023-02-16', 'ABCD1234', 'ABC Corp');
+
+
