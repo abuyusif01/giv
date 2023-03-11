@@ -6,8 +6,6 @@
 4. email [_email]
 5. date [_date]
 
-
-
 # Entry [1]
 
 1. proforma invoice number [_inumber]
@@ -19,7 +17,6 @@
 8. total cost (currency) [_tcost]
 9. total amount [_price * _ncontainer]
 
-
 # Entry [2]
 
 1. payment [deposit_value]
@@ -29,11 +26,10 @@
 5. bank branch location
 6. bank swift code
 
-
 # random stuff
 
 invoice number incremental
-total cost can be calculate = 22.10 * 1337 
+total cost can be calculate = 22.10 * 1337
 
 9897_AbubakarAbubakarYusif_COOKINGOIL_BALDE.pdf
 tcost = 29,547.7
@@ -44,5 +40,3 @@ x2 = deposite
 x3 = 100 - x1
 
 x1, x2, x3
-
-

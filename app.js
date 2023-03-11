@@ -5,7 +5,7 @@ const session = require("express-session");
 const path = require("path");
 
 
-const { createInvoice, retrievInvoice, storage } = require('./pdfGenerator.js');
+const { createInvoice, retrievInvoice, storage, insertInvoice } = require('./pdfGenerator.js');
 
 dotenv.config();
 
@@ -52,7 +52,15 @@ app.get('/', (req, res) => {
 
 //  route for submit form
 app.post('/submit', async (req, res) => {
-    await createInvoice(req.body, connection, res);
+
+    // if (req.session.loggedin) {
+        console.log(req.body);
+        if (Object.values(req.body).every(val => val === '')) {
+            res.send("<script> alert('all fields cant be empty'); window.location.replace('/')</script>");
+            return;
+        }
+        await insertInvoice(req.body, connection, res);
+    // }
 });
 
 
@@ -117,6 +125,12 @@ app.post('/signup', (req, res) => {
 app.get("/signup", (req, res) => {
     res.sendFile(__static_html + '/signup.html');
 });
+
+
+app.get("/dashboard", (req, res) => {
+    res.sendFile(__static_html + '/dashboard.html');
+});
+
 app.listen(3000, () => {
     console.log('Listening on port 3000');
 });

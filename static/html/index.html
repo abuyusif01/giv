@@ -7,11 +7,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://fonts.googleapis.com/css?family=Raleway" rel="stylesheet">
     <link rel=" stylesheet" href="style.css">
+    <link rel="stylesheet" href="dashboard.css">
     <title>GIV INVOICDE</title>
 
 </head>
 
 <body>
+
+    <nav class="navbar"> <!-- LOGO -->
+        <div class="logo">GIV</div> <!-- NAVIGATION MENU -->
+        <ul class="nav-links"> <!-- USING CHECKBOX HACK --> <input type="checkbox" id="hidden_btn" />
+            <label for="hidden_btn" class="hamburger">&#9776;</label> <!-- NAVIGATION MENUS -->
+            <div class="menu">
+                <li><a href="/">Home</a></li>
+                <li><a href="/">Generate Invoice</a></li>
+                <li><a href="/">Edit Invoice</a></li>
+
+                <li><a href="/">View All Invoices</a></li>
+                <li><a href="/retrieve">Retrieve Invoice</a></li>
+            </div>
+        </ul>
+    </nav>
     <form id="regForm" action="/submit" method="post">
 
         <!-- One "tab" for each step in the form: -->
@@ -24,7 +40,7 @@
         </div>
         <div class="tab">
             <h1>Product Details</h1>
-            <p><input type="number" placeholder="PI NUMBER" oninput="this.className = ''" name="_pi"></p>
+            <!-- <p><input type="number" placeholder="PI NUMBER" oninput="this.className = ''" name="_pi"></p> -->
             <p><input placeholder="Product Name" oninput="this.className = ''" name="_product"></p>
             <p><input placeholder="Packing Size" oninput="this.className = ''" name="_size"></p>
             <p><input type="number" placeholder="Price" oninput="this.className = ''" name="_price"></p>
@@ -35,7 +51,13 @@
         <div class="tab">
             <h1>Delivery and Payment</h1>
             <p><input placeholder="DEPOSIT" oninput="this.className = ''" name="_depo"></p>
-            <p><input placeholder="CURRENCY" oninput="this.className = ''" name="_currency"></p>
+            <div style="height: inherit; padding-top: 10px;">
+                <select name="_currency" style="height: 40px;">
+                    <option value="USD">-- CHOOSE CURRENCY --</option>
+                    <option value="USD">USD</option>
+                    <option value="EUR">EUR</option>
+                </select>
+            </div>
             <p><input placeholder="DELIVERY" oninput="this.className = ''" name="_delivery"></p>
             <p><input placeholder="SELLER NAME" oninput="this.className = ''" name="_seller"></p>
 
@@ -71,9 +93,19 @@
             }
             if (n == (x.length - 1)) {
                 document.getElementById("nextBtn").innerHTML = "Submit";
-                document.getElementById("prevBtn").innerHTML = "Home";
+                document.getElementById("nextBtn").onclick = async function () {
+                    if (document.getElementById("nextBtn").innerHTML == "Submit") {
+                        document.getElementById("regForm").submit();
+                        await new Promise(r => setTimeout(r, 1500));
+                        location.reload();
+                    }
+                    else {
+                        nextPrev(1);
+                    }
+                }
+                document.getElementById("prevBtn").innerHTML = "Prev";
                 document.getElementById("prevBtn").onclick = function () {
-                    window.location.reload();
+                    nextPrev(-1);
                 }
             } else {
                 document.getElementById("nextBtn").innerHTML = "Next";
@@ -85,8 +117,6 @@
         function nextPrev(n) {
 
             var x = document.getElementsByClassName("tab");
-
-            if (n == 1 && !validateForm()) return false;
 
             x[currentTab].style.display = "none";
 

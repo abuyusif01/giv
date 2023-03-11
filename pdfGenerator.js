@@ -439,7 +439,7 @@ const createInvoice = async (invoice, connection, res, x = 0) => {
             if (err) throw err;
             generateHeader(doc); // Invoke `generateHeader` function.
             generateEntry0(doc, invoice); // Invoke `generateEntry0` function.
-            generateEntry1(doc, invoice, "pi", result[0]._inumber); // Invoke `generateEntry1` function.
+            generateEntry1(doc, invoice, "pi", parseInt(result[0]._inumber) + 1); // Invoke `generateEntry1` function.
             generateEntry2(doc, invoice);
             signatureEntry(doc)
             generateFooter(doc);
@@ -447,14 +447,11 @@ const createInvoice = async (invoice, connection, res, x = 0) => {
             doc.addPage();
             generateHeader(doc);
             generateEntry0(doc, invoice); // Invoke `generateEntry0` function.
-            generateEntry1(doc, invoice, "sc", result[0]._inumber, 1);
+            generateEntry1(doc, invoice, "sc", parseInt(result[0]._inumber) + 1, 1);
             signatureEntry(doc, 0) // Invoke `generateEntry1` function.
             generateFooter(doc); // Invoke `generateFooter` function.
             doc.end();
-            x == 0 ? insertInvoice(invoice, connection) : null;
         } catch (error) {
-
-            // await res.send("Invoice Number is not defined. Please contact the administrator.")
             res.send(error)
         }
 
@@ -463,7 +460,7 @@ const createInvoice = async (invoice, connection, res, x = 0) => {
 
     try {
         let x = invoice._inumber.length // if invoice._inumber is not defined then it will throw an error
-        var path = `./static/pdf/${invoice._inumber}_${invoice._name}_${invoice._product}_${invoice._seller}.pdf`;
+        var path = `./static/pdf/${invoice._inumber + 1}_${invoice._name}_${invoice._product}_${invoice._seller}.pdf`;
         doc.pipe(fs.createWriteStream(path));
         await sleep(500);
         res.download(path);
@@ -473,7 +470,7 @@ const createInvoice = async (invoice, connection, res, x = 0) => {
         connection.query(sql, async (err, result) => {
             if (err) throw err;
             var _inumber = result[0]._inumber;
-            var path = `./static/pdf/${_inumber}_${invoice._name}_${invoice._product}_${invoice._seller}.pdf`;
+            var path = `./static/pdf/${_inumber + 1}_${invoice._name}_${invoice._product}_${invoice._seller}.pdf`;
             doc.pipe(fs.createWriteStream(path));
             await sleep(500);
             res.download(path);
@@ -483,7 +480,7 @@ const createInvoice = async (invoice, connection, res, x = 0) => {
 }
 
 
-const insertInvoice = async (invoice, connection) => {
+const insertInvoice = async (invoice, connection, res) => {
     const {
         _pi,
         _name,
@@ -505,13 +502,33 @@ const insertInvoice = async (invoice, connection) => {
     let _date = currentDate;
     _tcost = invoice._price * invoice._ucontainer;
 
-    let sql = `INSERT INTO invoice (_inumber, _name, _addr, _tel, _email, _product, _size, _price, _ucontainer, _ncontainer, _depo, _delivery, _currency, _swiftcode, _tcost, _seller, _date) VALUES ('${_pi}', '${_name}', '${_addr}', '${_tel}', '${_email}', '${_product}', '${_size}', '${_price}', '${_ucontainer}', '${_ncontainer}', '${_depo}', '${_delivery}', '${_currency}', '${_swiftcode}', '${_tcost}', '${_seller}', '${_date}') ON DUPLICATE KEY UPDATE _inumber='${_pi}', _name='${_name}', _addr='${_addr}', _tel='${_tel}', _email='${_email}', _product='${_product}', _size='${_size}', _price='${_price}', _ucontainer='${_ucontainer}', _ncontainer='${_ncontainer}', _depo='${_depo}', _delivery='${_delivery}', _currency='${_currency}', _swiftcode='${_swiftcode}', _tcost='${_tcost}', _seller='${_seller}', _date='${_date}'`;
+    // we check if the pi number is given then we just continew to insert the data
+    // if not then we try to the latest on the db and add 1 to it
 
-    connection.query(sql, (err, result) => {
-        if (err) {
-            // console.log(err);
-        }
-    });
+    if (_pi > 0) {
+        let sql = `INSERT INTO invoice (_inumber, _name, _addr, _tel, _email, _product, _size, _price, _ucontainer, _ncontainer, _depo, _delivery, _currency, _swiftcode, _tcost, _seller, _date) VALUES ('${_pi}', '${_name}', '${_addr}', '${_tel}', '${_email}', '${_product}', '${_size}', '${_price}', '${_ucontainer}', '${_ncontainer}', '${_depo}', '${_delivery}', '${_currency}', '${_swiftcode}', '${_tcost}', '${_seller}', '${_date}') ON DUPLICATE KEY UPDATE _inumber='${_pi}', _name='${_name}', _addr='${_addr}', _tel='${_tel}', _email='${_email}', _product='${_product}', _size='${_size}', _price='${_price}', _ucontainer='${_ucontainer}', _ncontainer='${_ncontainer}', _depo='${_depo}', _delivery='${_delivery}', _currency='${_currency}', _swiftcode='${_swiftcode}', _tcost='${_tcost}', _seller='${_seller}', _date='${_date}'`;
+        connection.query(sql, (err, result) => {
+            if (err) {
+                console.log(err);
+            }
+        });
+
+    }
+    else {
+        let sql = "SELECT _inumber FROM invoice WHERE _inumber=(SELECT MAX(_inumber) FROM invoice);"
+        connection.query(sql, (err, result) => {
+            let _pi = result[0]._inumber + 1;
+            let sql = `INSERT INTO invoice (_inumber, _name, _addr, _tel, _email, _product, _size, _price, _ucontainer, _ncontainer, _depo, _delivery, _currency, _swiftcode, _tcost, _seller, _date) VALUES ('${_pi}', '${_name}', '${_addr}', '${_tel}', '${_email}', '${_product}', '${_size}', '${_price}', '${_ucontainer}', '${_ncontainer}', '${_depo}', '${_delivery}', '${_currency}', '${_swiftcode}', '${_tcost}', '${_seller}', '${_date}') ON DUPLICATE KEY UPDATE _inumber='${_pi}', _name='${_name}', _addr='${_addr}', _tel='${_tel}', _email='${_email}', _product='${_product}', _size='${_size}', _price='${_price}', _ucontainer='${_ucontainer}', _ncontainer='${_ncontainer}', _depo='${_depo}', _delivery='${_delivery}', _currency='${_currency}', _swiftcode='${_swiftcode}', _tcost='${_tcost}', _seller='${_seller}', _date='${_date}'`;
+
+            connection.query(sql, (err, result) => {
+                if (err) {
+                    console.log(err);
+                }
+            });
+        });
+    }
+
+    createInvoice(invoice, connection, res, 0);
 }
 
 
