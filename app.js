@@ -6,7 +6,7 @@ const path = require("path");
 
 
 const { createInvoice, retrievInvoice, storage, insertInvoice } = require('./pdfGenerator.js');
-
+const port = process.env.SERVER_PORT || 3000;
 dotenv.config();
 
 const connection = msql.createConnection({
