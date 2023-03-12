@@ -66,6 +66,10 @@ app.post('/submit', async (req, res) => {
 
 app.get('/retrieve', (req, res) => {
     res.sendFile(__static_html + '/retrieve.html');
+    if (req.query.id) {
+        console.log(req.query.id);
+        retrievInvoice(parseInt(req.query.id), connection, res)
+    }
 });
 
 
@@ -170,6 +174,7 @@ app.post("/edit_data", (req, res) => {
             res.status(500).send('Error updating data');
             return;
         }
+
     });
 });
 app.listen(3000, () => {

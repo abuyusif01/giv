@@ -421,7 +421,6 @@ const generateFooter = (doc) => {
             doc.page.height - 40,
             { align: 'center', width: 600 },
         );
-
 }
 
 
@@ -432,7 +431,6 @@ const createInvoice = async (invoice, connection, res, x = 0) => {
         font: pdfConfig.font,
     });
     var sql = '';
-    console.log(x);
     x == 0 ? sql = "SELECT _inumber FROM invoice WHERE _inumber=(SELECT MAX(_inumber) FROM invoice);" : sql = `SELECT _inumber FROM invoice WHERE _inumber=${x - 1};`;
     connection.query(sql, async function (err, result) {
 
@@ -584,5 +582,3 @@ module.exports = {
 
 // INSERT INTO invoice (_inumber, _name, _addr, _tel, _email, _product, _size, _price, _ucontainer, _ncontainer, _depo, _currency, _delivery, _tcost, _date, _swiftcode, _seller)
 // VALUES ('4965', 'John Doe', '123 Main St', '555-555-5555', 'johndoe@email.com', 'Widget', 'Medium', '100.00', '20ft', 'ABCD1234567', 'Los Angeles', 'USD', 'Ground', '10.00', '2023-02-16', 'ABCD1234', 'ABC Corp');
-
-

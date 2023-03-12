@@ -21,7 +21,7 @@
             <div class="menu">
 
                 <li><a href="/">Generate Invoice</a></li>
-                <li><a href="/">Edit Invoice</a></li>
+                <li><a href="/edit_data">Edit Invoice</a></li>
 
                 <li><a href="/">View All Invoices</a></li>
                 <li><a href="/retrieve">Retrieve Invoice</a></li>
@@ -79,12 +79,14 @@
 
         const generatePdf = async () => {
             document.getElementById('regForm').submit(); // this update the db   
+            await new Promise(r => setTimeout(r, 500));
             downlaod();
         }
 
-        const downlaod = () => {
+        const downlaod = async () => {
             document.getElementById("_inumber").value = parseInt(document.getElementById("id").value);
             document.getElementById('xyzform').submit(); // this generate the pdf
+            await new Promise(r => setTimeout(r, 500));
         }
 
 
