@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css?family=Raleway" rel="stylesheet">
+    <link rel=" stylesheet" href="style.css">
+    <link rel="stylesheet" href="dashboard.css">
+    <title>GIV INVOICDE</title>
+
+</head>
+
+<body>
+
+    <nav class="navbar"> <!-- LOGO -->
+        <div class="logo">GIV</div> <!-- NAVIGATION MENU -->
+        <ul class="nav-links"> <!-- USING CHECKBOX HACK --> <input type="checkbox" id="hidden_btn" />
+            <label for="hidden_btn" class="hamburger">&#9776;</label> <!-- NAVIGATION MENUS -->
+            <div class="menu">
+
+                <li><a href="/">Generate Invoice</a></li>
+                <li><a href="/">Edit Invoice</a></li>
+
+                <li><a href="/">View All Invoices</a></li>
+                <li><a href="/retrieve">Retrieve Invoice</a></li>
+            </div>
+        </ul>
+    </nav>
+
+    <form id="regForm" action="/edit_data" method="post">
+        <h3 style="color: red; text-align: center;">customer details</h3>
+
+        <div class="tab">
+            <button class="tablinks" onclick="openTab(event, 'formTab')">Get Data</button>
+        </div>
+
+        <div id="formTab" class="tabcontent">
+
+            <!-- customer details -->
+            <input type="number" id="id" placeholder="enter pi number to edit" name="_inumber">
+            <input type="submit" value="Submit">
+            <input type="text" name="_name" placeholder="customer name">
+            <input type="text" name="_addr" placeholder="address">
+            <input type="number" name="_tel" placeholder="phone number">
+            <input type="email" name="_email" placeholder="email">
+
+            <!-- product details -->
+            <h3 style="color: red; text-align: center; padding-top: 1%">product details</h3>
+            <input type="text" name="_product" placeholder="product name">
+            <input type="text" name="_size" placeholder="packing size">
+            <input type="number" name="_price" placeholder="price">
+            <input type="number" name="_ucontainer" placeholder="Unit / Container">
+            <input type="number" name="_ncontainer" placeholder="No of Container">
+
+
+            <!-- delivery and payment -->
+            <h3 style="color: red; text-align: center; padding-top: 1%;">delivery and payment</h3>
+            <input type="text" name="_depo" placeholder="Deposit in percent">
+            <input type="text" name="_currency" placeholder="currency">
+            <input type="text" name="_delivery" placeholder="Delivery">
+            <input type="text" name="_seller" placeholder="seller name">
+            <input type="button" value="reGenerate Invoice" onclick="generatePdf()">
+
+        </div>
+    </form>
+
+    <form action="/retrieve" method="post" id="xyzform" style="display: none;">
+
+        <h1>Retrieve Invoice</h1>
+        <div style="text-align: center;">
+            <p style="padding: 15px;"><input placeholder="Invoice Number" name="_inumber" id="_inumber" required></p>
+            <button type="submit" style="display: block; margin: 10px auto; border-radius: 5%;">Submit</button>
+        </div>
+    </form>
+
+    <script>
+
+        const generatePdf = async () => {
+            document.getElementById('regForm').submit(); // this update the db   
+            downlaod();
+        }
+
+        const downlaod = () => {
+            document.getElementById("_inumber").value = parseInt(document.getElementById("id").value);
+            document.getElementById('xyzform').submit(); // this generate the pdf
+        }
+
+
+        // Open the form tab when the button is clicked
+        function openTab(evt, tabName) {
+            var i, tabcontent, tablinks;
+            tabcontent = document.getElementsByClassName("tabcontent");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].style.display = "none";
+            }
+            tablinks = document.getElementsByClassName("tablinks");
+            for (i = 0; i < tablinks.length; i++) {
+                tablinks[i].className = tablinks[i].className.replace(" active", "");
+            }
+            document.getElementById(tabName).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+
+        // Handle form submission
+        document.querySelector('form').addEventListener('submit', function (event) {
+            event.preventDefault();
+            var id = document.getElementById('id').value;
+
+            // Make an AJAX request to the server to retrieve data for the given ID
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', '/get_data?id=' + id);
+            xhr.onload = function () {
+                if (xhr.status === 200) {
+                    // If the request was successful, parse the response and assign default values to the form fields
+                    var data = JSON.parse(xhr.responseText);
+                    document.getElementsByName('_name')[0].value = data._name;
+                    document.getElementsByName('_addr')[0].value = data._addr;
+                    document.getElementsByName('_tel')[0].value = data._tel;
+                    document.getElementsByName('_email')[0].value = data._email;
+                    document.getElementsByName('_product')[0].value = data._product;
+                    document.getElementsByName('_size')[0].value = data._size;
+                    document.getElementsByName('_price')[0].value = data._price;
+                    document.getElementsByName('_ucontainer')[0].value = data._ucontainer;
+                    document.getElementsByName('_ncontainer')[0].value = data._ncontainer;
+                    document.getElementsByName('_depo')[0].value = data._depo;
+                    document.getElementsByName('_currency')[0].value = data._currency;
+                    document.getElementsByName('_delivery')[0].value = data._delivery;
+                    document.getElementsByName('_seller')[0].value = data._seller;
+
+                }
+            };
+            xhr.send();
+        });
+    </script>
+
+
+</body>
+
+</html>

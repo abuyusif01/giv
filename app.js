@@ -54,12 +54,12 @@ app.get('/', (req, res) => {
 app.post('/submit', async (req, res) => {
 
     // if (req.session.loggedin) {
-        console.log(req.body);
-        if (Object.values(req.body).every(val => val === '')) {
-            res.send("<script> alert('all fields cant be empty'); window.location.replace('/')</script>");
-            return;
-        }
-        await insertInvoice(req.body, connection, res);
+    console.log(req.body);
+    if (Object.values(req.body).every(val => val === '')) {
+        res.send("<script> alert('all fields cant be empty'); window.location.replace('/')</script>");
+        return;
+    }
+    await insertInvoice(req.body, connection, res);
     // }
 });
 
@@ -70,7 +70,15 @@ app.get('/retrieve', (req, res) => {
 
 
 app.post('/retrieve', async (req, res) => {
-    await retrievInvoice(parseInt(req.body._inumber) || 1, connection, res)
+
+    // if id exist means we calling this from the edit page else just normal call from the retrieve endpoitt
+    if (req.query.id) {
+        console.log(req.query.id);
+        await retrievInvoice(parseInt(req.query.id), connection, res)
+    }
+    else {
+        await retrievInvoice(parseInt(req.body._inumber) || 1, connection, res)
+    }
 });
 
 
@@ -131,9 +139,39 @@ app.get("/dashboard", (req, res) => {
     res.sendFile(__static_html + '/dashboard.html');
 });
 
+
+app.get("/get_data", (req, res) => {
+    const id = req.query.id;
+
+    connection.query('SELECT * FROM invoice WHERE _inumber = ?', [id], async (error, results, fields) => {
+
+        if (error) {
+            console.log(error);
+            res.status(500).send('Error retrieving data');
+            return;
+        }
+        res.json(results[0]);
+    });
+});
+
+
+app.get("/edit_data", (req, res) => {
+    res.sendFile(__static_html + '/edit.html');
+});
+
+app.post("/edit_data", (req, res) => {
+    const { _inumber, _name, _addr, _tel, _email, _product, _size, _price, _ucontainer, _ncontainer, _depo, _currency, _delivery, _seller } = req.body;
+
+    console.log(req.body);
+    connection.query('UPDATE invoice SET _name = ?, _addr = ?, _tel = ?, _email = ?, _product = ?, _size = ?, _price = ?, _ucontainer = ?, _ncontainer = ?, _depo = ?, _currency = ?, _delivery = ?, _seller = ? WHERE _inumber = ?', [_name, _addr, _tel, _email, _product, _size, _price, _ucontainer, _ncontainer, _depo, _currency, _delivery, _seller, _inumber], async (error, results, fields) => {
+
+        if (error) {
+            console.log(error);
+            res.status(500).send('Error updating data');
+            return;
+        }
+    });
+});
 app.listen(3000, () => {
     console.log('Listening on port 3000');
 });
-
-// save those things and display based on files on the system
-// create db that stores the invoice number and the file name for this functionallity

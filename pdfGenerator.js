@@ -431,8 +431,9 @@ const createInvoice = async (invoice, connection, res, x = 0) => {
         size: pdfConfig.paperSize,
         font: pdfConfig.font,
     });
-
-    let sql = "SELECT _inumber FROM invoice WHERE _inumber=(SELECT MAX(_inumber) FROM invoice);"
+    var sql = '';
+    console.log(x);
+    x == 0 ? sql = "SELECT _inumber FROM invoice WHERE _inumber=(SELECT MAX(_inumber) FROM invoice);" : sql = `SELECT _inumber FROM invoice WHERE _inumber=${x - 1};`;
     connection.query(sql, async function (err, result) {
 
         try {
@@ -460,7 +461,7 @@ const createInvoice = async (invoice, connection, res, x = 0) => {
 
     try {
         let x = invoice._inumber.length // if invoice._inumber is not defined then it will throw an error
-        var path = `./static/pdf/${invoice._inumber + 1}_${invoice._name}_${invoice._product}_${invoice._seller}.pdf`;
+        var path = `./static/pdf/${x == 0 ? invoice._inumber + 1 : invoice._inumber}_${invoice._name}_${invoice._product}_${invoice._seller}.pdf`;
         doc.pipe(fs.createWriteStream(path));
         await sleep(500);
         res.download(path);
@@ -470,7 +471,7 @@ const createInvoice = async (invoice, connection, res, x = 0) => {
         connection.query(sql, async (err, result) => {
             if (err) throw err;
             var _inumber = result[0]._inumber;
-            var path = `./static/pdf/${_inumber + 1}_${invoice._name}_${invoice._product}_${invoice._seller}.pdf`;
+            var path = `./static/pdf/${x == 0 ? _inumber + 1 : _inumber}_${invoice._name}_${invoice._product}_${invoice._seller}.pdf`;
             doc.pipe(fs.createWriteStream(path));
             await sleep(500);
             res.download(path);
@@ -539,7 +540,7 @@ const retrievInvoice = async (inumber, connection, res,) => {
             if (err) {
                 console.log(err);
             } else {
-                createInvoice(result[0], connection, res, 1);
+                createInvoice(result[0], connection, res, inumber);
             }
         });
     } catch (error) {
