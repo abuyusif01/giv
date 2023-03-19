@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>View All Invoices</title>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css?family=Raleway" rel="stylesheet">
+
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.4/css/jquery.dataTables.css">
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/1.11.4/js/jquery.dataTables.min.js"></script>
+    <link rel=" stylesheet" href="style.css">
+    <link rel="stylesheet" href="dashboard.css">
+</head>
+
+<body>
+    <nav class="navbar"> <!-- LOGO -->
+        <div class="logo">Invoice Dashboard</div> <!-- NAVIGATION MENU -->
+        <ul class="nav-links"> <!-- USING CHECKBOX HACK --> <input type="checkbox" id="hidden_btn" />
+            <label for="hidden_btn" class="hamburger">&#9776;</label> <!-- NAVIGATION MENUS -->
+            <div class="menu">
+
+                <li><a href="/">Generate Invoice</a></li>
+                <li><a href="/edit_data">Edit Invoice</a></li>
+
+                <li><a href="/view_all">View All Invoices</a></li>
+                <li><a href="/retrieve">Retrieve Invoice</a></li>
+            </div>
+        </ul>
+    </nav>
+    <div style="padding: -10px;" id="regForm">
+        <h1>View all invoices</h1>
+        <table id="example" class="display" style="width:100%; text-align: left; color: black;">
+            <thead>
+                <tr>
+                    <th>Customer Name</th>
+                    <th>Product Name</th>
+                    <th>Price</th>
+                    <th>Number of Containers</th>
+                    <th>Deposit - Percent</th>
+                    <th>Currency</th>
+                    <th>Delivery </th>
+                    <th>Total Cost</th>
+                    <th>Date</th>
+                    <th>Seller Name</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+    <script>
+        $(document).ready(function () {
+            $('#example').DataTable({
+                ajax: {
+                    url: '/all',
+                    dataSrc: ''
+                },
+
+                columns: [
+                    { data: '_name' },
+                    { data: '_product' },
+                    { data: '_price' },
+                    { data: '_ncontainer' },
+                    { data: '_depo' },
+                    { data: '_currency' },
+                    { data: '_delivery' },
+                    { data: '_tcost' },
+                    { data: '_date' },
+                    { data: '_seller' }
+                ]
+            });
+        });
+    </script>
+</body>
+
+</html>

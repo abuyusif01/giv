@@ -40,3 +40,10 @@ x2 = deposite
 x3 = 100 - x1
 
 x1, x2, x3
+
+# Qoutation
+
+EC2 -> server to host the site => 10.44/month ec2 with 50% usage 46.72 myr monthly
+S3 -> backup 0.5myr/GB
+CloudFront -> if you guys want to have a domain [this can be free for the first year] after wards its like 20usd =>  100myr yearly
+Domain -> for start point 200myr yearly renewal 50myr

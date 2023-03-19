@@ -20,7 +20,7 @@ const connection = msql.createConnection({
 const app = express();
 app.use(
     session({
-        secret: "secret",
+        secret: "c98f945d6192994fdefe9f547dceb2340cf5abuyusif01",
         resave: true,
         saveUninitialized: true,
     })
@@ -53,40 +53,54 @@ app.get('/', (req, res) => {
 //  route for submit form
 app.post('/submit', async (req, res) => {
 
-    // if (req.session.loggedin) {
-    console.log(req.body);
-    if (Object.values(req.body).every(val => val === '')) {
-        res.send("<script> alert('all fields cant be empty'); window.location.replace('/')</script>");
-        return;
+    if (req.session.loggedin) {
+        if (Object.values(req.body).every(val => val === '')) {
+            res.send("<script> alert('all fields cant be empty'); window.location.replace('/')</script>");
+            return;
+        }
+        await insertInvoice(req.body, connection, res);
     }
-    await insertInvoice(req.body, connection, res);
-    // }
+    else {
+        res.sendFile(__static_html + '/login.html');
+    }
 });
 
 
 app.get('/retrieve', (req, res) => {
-    res.sendFile(__static_html + '/retrieve.html');
-    if (req.query.id) {
-        console.log(req.query.id);
-        retrievInvoice(parseInt(req.query.id), connection, res)
+
+    if (req.session.loggedin) {
+        res.sendFile(__static_html + '/retrieve.html');
+        if (req.query.id) {
+            console.log(req.query.id);
+            retrievInvoice(parseInt(req.query.id), connection, res)
+        }
+    }
+    else {
+        res.sendFile(__static_html + '/login.html');
     }
 });
 
 
 app.post('/retrieve', async (req, res) => {
 
-    // if id exist means we calling this from the edit page else just normal call from the retrieve endpoitt
-    if (req.query.id) {
-        console.log(req.query.id);
-        await retrievInvoice(parseInt(req.query.id), connection, res)
+    if (req.session.loggedin) {
+        if (req.query.id) {
+            await retrievInvoice(parseInt(req.query.id), connection, res)
+        }
+        else {
+            await retrievInvoice(parseInt(req.body._inumber) || 1, connection, res)
+        }
     }
     else {
-        await retrievInvoice(parseInt(req.body._inumber) || 1, connection, res)
+        res.sendFile(__static_html + '/login.html');
     }
+    // if id exist means we calling this from the edit page else just normal call from the retrieve endpoitt
+
 });
 
 
 app.post('/auth', async (req, res) => {
+
     const { username, password } = req.body;
     if (username && password) {
         connection.query('SELECT * FROM users WHERE username = ? AND password = ?', [username, password], async (error, results, fields) => {
@@ -107,7 +121,6 @@ app.post('/auth', async (req, res) => {
 
 
 app.post('/signup', (req, res) => {
-
 
     const { username, password, access } = req.body;
 
@@ -140,43 +153,95 @@ app.get("/signup", (req, res) => {
 
 
 app.get("/dashboard", (req, res) => {
-    res.sendFile(__static_html + '/dashboard.html');
+
+    if (req.session.loggedin) {
+        res.sendFile(__static_html + '/dashboard.html');
+    }
+    else {
+        res.sendFile(__static_html + '/login.html');
+    }
 });
 
 
 app.get("/get_data", (req, res) => {
-    const id = req.query.id;
 
-    connection.query('SELECT * FROM invoice WHERE _inumber = ?', [id], async (error, results, fields) => {
+    if (req.session.loggedin) {
+        const id = req.query.id;
+        connection.query('SELECT * FROM invoice WHERE _inumber = ?', [id], async (error, results, fields) => {
 
-        if (error) {
-            console.log(error);
-            res.status(500).send('Error retrieving data');
-            return;
-        }
-        res.json(results[0]);
-    });
+            if (error) {
+                console.log(error);
+                res.status(500).send('Error retrieving data');
+                return;
+            }
+            res.json(results[0]);
+        });
+    }
+    else {
+        res.sendFile(__static_html + '/login.html');
+    }
 });
 
 
 app.get("/edit_data", (req, res) => {
-    res.sendFile(__static_html + '/edit.html');
+    if (req.session.loggedin) {
+        res.sendFile(__static_html + '/edit.html');
+    }
+    else {
+        res.sendFile(__static_html + '/login.html');
+    }
 });
+
 
 app.post("/edit_data", (req, res) => {
-    const { _inumber, _name, _addr, _tel, _email, _product, _size, _price, _ucontainer, _ncontainer, _depo, _currency, _delivery, _seller } = req.body;
 
-    console.log(req.body);
-    connection.query('UPDATE invoice SET _name = ?, _addr = ?, _tel = ?, _email = ?, _product = ?, _size = ?, _price = ?, _ucontainer = ?, _ncontainer = ?, _depo = ?, _currency = ?, _delivery = ?, _seller = ? WHERE _inumber = ?', [_name, _addr, _tel, _email, _product, _size, _price, _ucontainer, _ncontainer, _depo, _currency, _delivery, _seller, _inumber], async (error, results, fields) => {
+    if (req.session.loggedin) {
+        const { _inumber, _name, _addr, _tel, _email, _product, _size, _price, _ucontainer, _ncontainer, _depo, _currency, _delivery, _seller } = req.body;
 
-        if (error) {
-            console.log(error);
-            res.status(500).send('Error updating data');
-            return;
-        }
+        connection.query('UPDATE invoice SET _name = ?, _addr = ?, _tel = ?, _email = ?, _product = ?, _size = ?, _price = ?, _ucontainer = ?, _ncontainer = ?, _depo = ?, _currency = ?, _delivery = ?, _seller = ? WHERE _inumber = ?', [_name, _addr, _tel, _email, _product, _size, _price, _ucontainer, _ncontainer, _depo, _currency, _delivery, _seller, _inumber], async (error, results, fields) => {
 
-    });
+            if (error) {
+                console.log(error);
+                res.status(500).send('Error updating data');
+                return;
+            }
+        });
+    }
+    else {
+        res.status(401).redirect('/');
+    }
 });
+
+
+app.get("/all", (req, res) => {
+
+    if (req.session.loggedin) {
+        connection.query('SELECT * FROM invoice', async (error, results, fields) => {
+
+            if (error) {
+                console.log(error);
+                res.status(500).send('Error retrieving data');
+                return;
+            }
+            res.json(results);
+        });
+    }
+    else {
+        res.status(401).redirect('/');
+    }
+});
+
+
+app.get("/view_all", (req, res) => {
+    if (req.session.loggedin) {
+        res.sendFile(__static_html + '/view_all_invoices.html');
+    }
+    else {
+        res.status(401).redirect('/');
+    }
+});
+
+
 app.listen(port, () => {
     console.log('Listening on port 3000');
 });
