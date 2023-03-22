@@ -245,6 +245,12 @@ app.get("/view_all", (req, res) => {
 });
 
 
+app.get("/logout", (req, res) => {
+    req.session.destroy();
+    res.redirect('/');
+});
+
+
 app.listen(port, () => {
     console.log('Listening on port 3000');
 });
