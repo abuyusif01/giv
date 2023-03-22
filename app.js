@@ -26,6 +26,7 @@ app.use(
     })
 );
 
+
 const __static_html = path.join(__dirname, "static").replace(/\\/g, "\\\\") + "/html";
 
 // express config for static files, json and other stuff
@@ -34,6 +35,8 @@ app.use(express.urlencoded({
     extended: true
 }));
 
+var favicon = require('serve-favicon');
+app.use(favicon(__dirname + '/static/images/favicon.ico'));
 app.use(express.static(path.join(__dirname, "static")));
 app.use(express.static(path.join(__dirname, "static/css")));
 app.use(express.static(path.join(__dirname, "static/js")));
