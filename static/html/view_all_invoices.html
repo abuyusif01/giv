@@ -35,15 +35,16 @@
         <table id="example" class="display" style="width:100%; text-align: left; color: black;">
             <thead>
                 <tr>
+                    <th>Invoice Number</th>
+                    <th>Date</th>
+                    <th>Delivery </th>
                     <th>Customer Name</th>
                     <th>Product Name</th>
                     <th>Price</th>
+                    <th>Currency</th>
                     <th>Number of Containers</th>
                     <th>Deposit - Percent</th>
-                    <th>Currency</th>
-                    <th>Delivery </th>
                     <th>Total Cost</th>
-                    <th>Date</th>
                     <th>Seller Name</th>
                 </tr>
             </thead>
@@ -58,21 +59,36 @@
                     url: '/all',
                     dataSrc: ''
                 },
-
                 columns: [
+                    { data: '_inumber' },
+                    { data: '_date' },
+                    {
+                        data: '_delivery',
+                        render: (data, type, row) => {
+                            let dx1 = parseInt(data.split(",")[0] || 1)
+                            let dx2 = parseInt(data.split(",")[1] || 0)
+                            let dxfinal = dx2 ? dx1 + " - " + dx2 + " WEEK(s)" : dx1 + " WEEK(s)"
+
+                            return dxfinal;
+                        }
+                    },
                     { data: '_name' },
                     { data: '_product' },
                     { data: '_price' },
+                    { data: '_currency' },
                     { data: '_ncontainer' },
                     { data: '_depo' },
-                    { data: '_currency' },
-                    { data: '_delivery' },
-                    { data: '_tcost' },
-                    { data: '_date' },
+                    {
+                        data: '_tcost',
+                        render: (data, type, row) => {
+                            return parseInt(data);
+                        }
+                    },
                     { data: '_seller' }
                 ]
             });
         });
+
     </script>
 </body>
 
