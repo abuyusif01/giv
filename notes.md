@@ -47,3 +47,44 @@ EC2 -> server to host the site => 10.44/month ec2 with 50% usage 46.72 myr month
 S3 -> backup 0.5myr/GB
 CloudFront -> if you guys want to have a domain [this can be free for the first year] after wards its like 20usd =>  100myr yearly
 Domain -> for start point 200myr yearly renewal 50myr
+
+
+## fixes
+1. when user enter wrong password, just alert
+2. fix address make it possible to be in 2 lines (if the chars somewhat more)
+3. let the user chose which bank to enter default usd -> actually extend the current option to let the user do that
+
+
+## client requirements
+1. address details, maybe need a few line 
+2. check date of invoice (get date from user machine, instead of using server time)
+3. PI number running, is it if different user use same time, will redundant or not? (this will always be different, depends on who come first) [done]
+4. bank details option [done?]
+
+
+BENEFICIARY               : GLOBAL INTELLECT VENTURES SDN BHD
+ACCOUNT NUMBER     : 701-1507818 (USD ACCOUNT)
+BANK NAME                  : OCBC BANK MALAYSIA BERHAD
+BRANCH                        : MENARA OCBC, NO 18, JALAN TUN PERAK, 50050 KUALA LUMPUR
+SWIFT CODE                : OCBCMYKLXXX
+
+
+BENEFICIARY               : GLOBAL INTELLECT VENTURES SDN BHD
+ACCOUNT NUMBER     : 701-1507826 (EURO ACCOUNT)
+BANK NAME                  : OCBC BANK MALAYSIA BERHAD
+BRANCH                        : MENARA OCBC, NO 18, JALAN TUN PERAK, 50050 KUALA LUMPUR	
+SWIFT CODE                : OCBCMYKLXXX
+
+
+BENEFICIARY               : GLOBAL INTELLECT VENTURES SDN BHD
+ACCOUNT NUMBER     : 873194813493 (USD ACCOUNT)
+BANK NAME                  : STANDARD CHARTERED BANK MALAYSIA BERHAD
+BRANCH                        : SCB JALAN IPOH NO.33-35 JALAN IPOH, GF, 51200 KUALA LUMPUR
+SWIFT CODE                :     MYKXXXX
+
+
+BENEFICIARY               : GLOBAL INTELLECT VENTURES SDN BHD
+ACCOUNT NUMBER     : 873194813507 (EURO ACCOUNT)
+BANK NAME                  : STANDARD CHARTERED BANK MALAYSIA BERHAD
+BRANCH                        : SCB JALAN IPOH NO.33-35 JALAN IPOH, GF, 51200 KUALA LUMPUR
+SWIFT CODE                : SCBLMYKXXXX
