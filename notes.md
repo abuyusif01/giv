@@ -56,10 +56,10 @@ Domain -> for start point 200myr yearly renewal 50myr
 
 
 ## client requirements
-1. address details, maybe need a few line 
-2. check date of invoice (get date from user machine, instead of using server time)
+1. address details, maybe need a few line  [done]
+2. check date of invoice (get date from user machine, instead of using server time) 
 3. PI number running, is it if different user use same time, will redundant or not? (this will always be different, depends on who come first) [done]
-4. bank details option [done?]
+4. bank details option [done]
 
 
 BENEFICIARY               : GLOBAL INTELLECT VENTURES SDN BHD

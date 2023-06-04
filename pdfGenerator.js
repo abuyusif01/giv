@@ -1,6 +1,7 @@
 const fs = require('fs');
 const PDFDocument = require('pdfkit-table');
 const converter = require('number-to-words');
+const wrap = require('word-wrap')
 const { spawn } = require('child_process');
 
 const normalFont = 'Times-Roman';
@@ -20,25 +21,10 @@ const pdfConfig = {
 }
 
 const currency_map = {
-    "USD": "$",
-    "DOLLAR": "$",
-    "$": "$",
-    "EUR": "€",
-    "EURO": "€",
-    "€": "€",
-    "GBP": "£",
-    "INR": "₹",
-    "AUD": "$",
-    "CAD": "$",
-    "SGD": "$",
-    "CHF": "CHF",
-    "MYR": "RM",
-    "JPY": "¥",
-    "CNY": "¥",
-    "HKD": "$",
-    "NZD": "$",
-    "THB": "฿",
-    "PHP": "₱",
+    "OCBC_USD": "$",
+    "SCBL_USD": "$",
+    "SCBL_EUR": "€",
+    "OCBC_EUR": "€",
 }
 
 const banks_info = {
@@ -48,6 +34,7 @@ const banks_info = {
         "BANK NAME": "STANDARD CHARTERED BANK MALAYSIA BERHAD",
         "BRANCH": "SCB JALAN IPOH NO. 33-35 JALAN IPOH, GF, 51200 KUALA LUMPUR",
         "SWIFT CODE": "SCBLMYKXXXX",
+        "CURRENCY": "USD"
     },
     "SCBL_USD": {
         "BENEFICIARY": "GLOBAL INTELLECT VENTURES SDN BHD",
@@ -55,6 +42,7 @@ const banks_info = {
         "BANK NAME": "STANDARD CHARTERED BANK MALAYSIA BERHAD",
         "BRANCH": "SCB JALAN IPOH NO. 33-35 JALAN IPOH, GF, 51200 KUALA LUMPUR",
         "SWIFT CODE": "SCBLMYKXXXX",
+        "CURRENCY": "EUR"
     },
     "OCBC_USD": {
         "BENEFICIARY": "GLOBAL INTELLECT VENTURES SDN BHD",
@@ -62,6 +50,7 @@ const banks_info = {
         "BANK NAME": "OCBC BANK MALAYSIA BERHAD",
         "BRANCH": "MENARA OCBC, NO 18, JALAN TUN PERAK, 50050 KUALA LUMPUR",
         "SWIFT CODE": "OCBCMYKLXXX",
+        "CURRENCY": "USD"
     },
     "OCBC_EUR": {
         "BENEFICIARY": "GLOBAL INTELLECT VENTURES SDN BHD",
@@ -69,6 +58,7 @@ const banks_info = {
         "BANK NAME": "OCBC BANK MALAYSIA BERHAD",
         "BRANCH": "MENARA OCBC, NO 18, JALAN TUN PERAK, 50050 KUALA LUMPUR",
         "SWIFT CODE": "OCBCMYKLXXX",
+        "CURRENCY": "EUR"
     }
 }
 var db_col = {
@@ -105,27 +95,33 @@ const sleep = (milliseconds) => {
     return new Promise(resolve => setTimeout(resolve, milliseconds))
 }
 
-
-const date = new Date();
-let day = date.getDate();
-let month = date.getMonth() + 1;
-let year = date.getFullYear();
-let currentDate = `${day < 10 ? "0" + day : day}-${month < 10 ? "0" + month : month}-${year}`;
-
 const generateEntry0 = (doc, invoice) => {
+    const {
+        _date
+    } = invoice;
+
+    const _useraddr = wrap(invoice._addr, { width: 65 })
 
     doc.fontSize(12).font('Times-Bold')
         .text(invoice._name.toUpperCase(), 30, 120, { align: 'left' }) // name
         .font('Times-Roman')
-        .text(invoice._addr, pdfConfig.startPoint, 140, { align: 'left' }) // address
-        .text("Tel: " + invoice._tel, pdfConfig.startPoint, 155, { align: 'left' }) // tel
-        .text("EMAIL: " + invoice._email, pdfConfig.startPoint, 170, { align: 'left' }) // email
-        .text("DATE: " + currentDate, 0, 125, { align: 'right' }) // date
+        .text(_useraddr, pdfConfig.startPoint - 5, 135, { align: 'left' }) // address
+        .text("Tel: " + invoice._tel, pdfConfig.startPoint, 170, { align: 'left' }) // tel
+        .text("EMAIL: " + invoice._email, pdfConfig.startPoint, 185, { align: 'left' }) // email
+        .text("DATE: " + _date, 0, 125, { align: 'right' }) // date
 
 }
 
 
 const generateEntry1 = (doc, invoice, section, section_number, x = 0) => {
+
+    const {
+        _date
+    } = invoice;
+
+    var month = _date.split("-")[1]
+    var year = _date.split('-')[2]
+
 
     let text = ""
     section == "sc" ?
@@ -261,7 +257,7 @@ const generateEntry1 = (doc, invoice, section, section_number, x = 0) => {
                 doc.
                     font("Helvetica-Bold").
                     text(`TOTAL: ${converter.toWords(parseInt(_tcost))
-                        .toUpperCase()} ${"(" + invoice._currency + ")"}`,
+                        .toUpperCase()} ${"(" + invoice._currency.split("_")[1] + ")"}`,
                         x + 5,
                         y + height - 15,
                         {
@@ -298,12 +294,11 @@ const generateEntry2 = (doc, invoice) => {
     let x3 = parseInt(100 - x1)
 
 
-
     let dx1 = parseInt(invoice._delivery.split(",")[0] || 1)
     let dx2 = parseInt(invoice._delivery.split(",")[1] || 0)
 
     let dxfinal = dx2 ? dx1 + " - " + dx2 + " WEEK(s)" : dx1 + " WEEK(s)"
-    let _currency = invoice._currency in currency_map ? invoice._currency : "USD"
+    let _currency = invoice._currency
 
     let beneficiary = banks_info[_currency]["BENEFICIARY"]
     let account_number = banks_info[_currency]["ACCOUNT NUMBER"]
@@ -506,11 +501,11 @@ const insertInvoice = async (invoice, connection, res) => {
         _depo,
         _delivery,
         _seller,
+        _date
     } = invoice;
 
-    let _currency = invoice._currency in currency_map ? invoice._currency : "USD"
-    let _swiftcode = banks_info[_currency]["SWIFT CODE"]
-    let _date = currentDate;
+    let _currency = banks_info[invoice._currency]["CURRENCY"] in currency_map ? invoice._currency : "USD"
+    let _swiftcode = banks_info[invoice._currency]["SWIFT CODE"]
     _tcost = invoice._price * invoice._ucontainer;
 
     // we check if the pi number is given then we just continew to insert the data

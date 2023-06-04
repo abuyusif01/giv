@@ -21,10 +21,10 @@
             <div class="menu">
 
                 <li><a href="/">Generate Invoice</a></li>
-                <li><a href="/edit_data">Edit Invoice</a></li>
+                
 
                 <li><a href="/view_all">View All Invoices</a></li>
-                <li><a href="/retrieve">Retrieve Invoice</a></li>
+
                 <li><a href="/logout">Logout</a></li>
             </div>
         </ul>
@@ -37,32 +37,115 @@
             <button class="tablinks" onclick="openTab(event, 'formTab')">Get Data</button>
         </div>
 
-        <div id="formTab" class="tabcontent">
+        <style>
+            .form-row {
+                display: flex;
+                align-items: center;
+                margin-bottom: 10px;
+            }
 
-            <!-- customer details -->
-            <input type="number" id="id" placeholder="enter pi number to edit" name="_inumber">
-            <input type="submit" value="Submit">
-            <input type="text" name="_name" placeholder="customer name">
-            <input type="text" name="_addr" placeholder="address">
-            <input type="number" name="_tel" placeholder="phone number">
-            <input type="email" name="_email" placeholder="email">
+            .form-row label {
+                width: 130px;
+                margin-right: 10px;
+                text-align: right;
+                font-weight: bold;
+            }
 
-            <!-- product details -->
-            <h3 style="color: red; text-align: center; padding-top: 1%">product details</h3>
-            <input type="text" name="_product" placeholder="product name">
-            <input type="text" name="_size" placeholder="packing size">
-            <input type="number" name="_price" placeholder="price">
-            <input type="number" name="_ucontainer" placeholder="Unit / Container">
-            <input type="number" name="_ncontainer" placeholder="No of Container">
+            .form-row input {
+                width: 100%;
+            }
+
+            .form-row select {
+                width: 500px;
+                height: 45px;
+                padding: 5px;
+                border: 1px solid #ccc;
+                border-radius: 4px;
+            }
+        </style>
+
+        <div class="form-row">
+            <label for="_name">Invoice Number:</label>
+            <input type="text" id="id" name="id" readonly>
+        </div>
+
+        <div class="form-row">
+            <label for="_name">Customer Name:</label>
+            <input type="text" id="_name" name="_name" placeholder="Customer Name">
+        </div>
+
+        <div class="form-row">
+            <label for="_addr">Address:</label>
+            <input type="text" id="_addr" name="_addr" placeholder="Address">
+        </div>
+
+        <div class="form-row">
+            <label for="_tel">Phone Number:</label>
+            <input type="number" id="_tel" name="_tel" placeholder="Phone Number">
+        </div>
+
+        <div class="form-row">
+            <label for="_email">Email:</label>
+            <input type="email" id="_email" name="_email" placeholder="Email">
+        </div>
+
+        <!-- product details -->
+        <h3 style="color: red; text-align: center; padding-top: 1%">product details</h3>
+        <div class="form-row">
+            <label for="_product">Product Name:</label>
+            <input type="text" id="_product" name="_product" placeholder="Product Name">
+        </div>
+
+        <div class="form-row">
+            <label for="_size">Packing Size:</label>
+            <input type="text" id="_size" name="_size" placeholder="Packing Size">
+        </div>
+
+        <div class="form-row">
+            <label for="_price">Price:</label>
+            <input type="number" id="_price" name="_price" placeholder="Price">
+        </div>
+
+        <div class="form-row">
+            <label for="_ucontainer">Unit / Container:</label>
+            <input type="number" id="_ucontainer" name="_ucontainer" placeholder="Unit / Container">
+        </div>
+
+        <div class="form-row">
+            <label for="_ncontainer">No of Container:</label>
+            <input type="number" id="_ncontainer" name="_ncontainer" placeholder="No of Container">
+        </div>
 
 
-            <!-- delivery and payment -->
-            <h3 style="color: red; text-align: center; padding-top: 1%;">delivery and payment</h3>
-            <input type="text" name="_depo" placeholder="Deposit in percent">
-            <input type="text" name="_currency" placeholder="currency">
-            <input type="text" name="_delivery" placeholder="Delivery">
-            <input type="text" name="_seller" placeholder="seller name">
-            <input type="button" value="reGenerate Invoice" onclick="generatePdf()">
+
+        <h3 style="color: red; text-align: center; padding-top: 1%;">delivery and payment</h3>
+        <div class="form-row">
+            <label for="_depo">Deposit in percent:</label>
+            <input type="text" id="_depo" name="_depo" placeholder="Deposit in percent">
+        </div>
+
+        <div class="form-row">
+            <label style= "margin-left: -18px;" for="_currency">Currency:</label>
+            <select id="_currency" name="_currency">
+                <option value="OCBC_USD">OCBC_USD</option>
+                <option value="SCBL_USD">SCBL_USD</option>
+                <option value="SCBL_EUR">SCBL_EUR</option>
+                <option value="OCBC_EUR">OCBC_EUR</option>
+            </select>
+        </div>
+
+
+        <div class="form-row">
+            <label for="_delivery">Delivery (Weeks):</label>
+            <input type="text" id="_delivery" name="_delivery" placeholder="Delivery">
+        </div>
+
+        <div class="form-row">
+            <label for="_seller">Seller Name:</label>
+            <input type="text" id="_seller" name="_seller" placeholder="Seller Name">
+        </div>
+        <input type="button" value="reGenerate Invoice" onclick="generatePdf()"
+            style="background-color: lightseagreen;">
 
         </div>
     </form>
@@ -107,9 +190,10 @@
         }
 
         // Handle form submission
-        document.querySelector('form').addEventListener('submit', function (event) {
-            event.preventDefault();
-            var id = document.getElementById('id').value;
+        document.addEventListener('DOMContentLoaded', function () {
+            var urlParams = new URLSearchParams(window.location.search);
+            var id = urlParams.get('id');
+            document.getElementById('id').value = id;
 
             // Make an AJAX request to the server to retrieve data for the given ID
             var xhr = new XMLHttpRequest();
@@ -117,21 +201,25 @@
             xhr.onload = function () {
                 if (xhr.status === 200) {
                     // If the request was successful, parse the response and assign default values to the form fields
-                    var data = JSON.parse(xhr.responseText);
-                    document.getElementsByName('_name')[0].value = data._name;
-                    document.getElementsByName('_addr')[0].value = data._addr;
-                    document.getElementsByName('_tel')[0].value = data._tel;
-                    document.getElementsByName('_email')[0].value = data._email;
-                    document.getElementsByName('_product')[0].value = data._product;
-                    document.getElementsByName('_size')[0].value = data._size;
-                    document.getElementsByName('_price')[0].value = data._price;
-                    document.getElementsByName('_ucontainer')[0].value = data._ucontainer;
-                    document.getElementsByName('_ncontainer')[0].value = data._ncontainer;
-                    document.getElementsByName('_depo')[0].value = data._depo;
-                    document.getElementsByName('_currency')[0].value = data._currency;
-                    document.getElementsByName('_delivery')[0].value = data._delivery;
-                    document.getElementsByName('_seller')[0].value = data._seller;
+                    try {
+                        var data = JSON.parse(xhr.responseText);
+                        document.getElementsByName('_name')[0].value = data._name;
+                        document.getElementsByName('_addr')[0].value = data._addr;
+                        document.getElementsByName('_tel')[0].value = data._tel;
+                        document.getElementsByName('_email')[0].value = data._email;
+                        document.getElementsByName('_product')[0].value = data._product;
+                        document.getElementsByName('_size')[0].value = data._size;
+                        document.getElementsByName('_price')[0].value = data._price;
+                        document.getElementsByName('_ucontainer')[0].value = data._ucontainer;
+                        document.getElementsByName('_ncontainer')[0].value = data._ncontainer;
+                        document.getElementsByName('_depo')[0].value = data._depo;
+                        document.getElementsByName('_currency')[0].value = data._currency;
+                        document.getElementsByName('_delivery')[0].value = data._delivery;
+                        document.getElementsByName('_seller')[0].value = data._seller;
 
+                    } catch (error) {
+                        console.log('something went down!!')
+                    }
                 }
             };
             xhr.send();

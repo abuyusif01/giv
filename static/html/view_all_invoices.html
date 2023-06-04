@@ -23,10 +23,7 @@
             <div class="menu">
 
                 <li><a href="/">Generate Invoice</a></li>
-                <li><a href="/edit_data">Edit Invoice</a></li>
-
-                <li><a href="/view_all">View All Invoices</a></li>
-                <li><a href="/retrieve">Retrieve Invoice</a></li>
+                <li><a href="/view_all">Retreive Invoices</a></li>
                 <li><a href="/logout">Logout</a></li>
             </div>
         </ul>
@@ -47,6 +44,8 @@
                     <th>Deposit - Percent</th>
                     <th>Total Cost</th>
                     <th>Seller Name</th>
+                    <th>Edit / Download</th>
+
                 </tr>
             </thead>
             <tbody>
@@ -55,7 +54,7 @@
     </div>
     <script>
         $(document).ready(function () {
-            $('#example').DataTable({
+            var table = $('#example').DataTable({
                 ajax: {
                     url: '/all',
                     dataSrc: ''
@@ -65,10 +64,10 @@
                     { data: '_date' },
                     {
                         data: '_delivery',
-                        render: (data, type, row) => {
-                            let dx1 = parseInt(data.split(",")[0] || 1)
-                            let dx2 = parseInt(data.split(",")[1] || 0)
-                            let dxfinal = dx2 ? dx1 + " - " + dx2 + " WEEK(s)" : dx1 + " WEEK(s)"
+                        render: function (data, type, row) {
+                            let dx1 = parseInt(data.split(",")[0] || 1);
+                            let dx2 = parseInt(data.split(",")[1] || 0);
+                            let dxfinal = dx2 ? dx1 + " - " + dx2 + " WEEK(s)" : dx1 + " WEEK(s)";
 
                             return dxfinal;
                         }
@@ -81,15 +80,64 @@
                     { data: '_depo' },
                     {
                         data: '_tcost',
-                        render: (data, type, row) => {
+                        render: function (data, type, row) {
                             return parseInt(data);
                         }
                     },
-                    { data: '_seller' }
+                    { data: '_seller' },
+                    {
+                        data: '_inumber',
+                        render: function (data, type, row) {
+                            return '<button class="btn-edit" style=" background-color: #ff9800; margin: 4px;"data-id="' + data + '">Edit Invoice</button>' +
+                                '<button class="btn-download" style="margin: 4px; padding-right: 28px" data-id="' + data + '">Download</button>';
+                        }
+                    }
                 ]
+            });
+
+            // Handle download button click
+            $('#example tbody').on('click', '.btn-download', function () {
+                var id = $(this).data('id');
+                var name = $(this).closest('tr').find('td:nth-child(4)').text();
+                var product = $(this).closest('tr').find('td:nth-child(5)').text();
+                var seller = $(this).closest('tr').find('td:nth-child(11)').text();
+                $.ajax({
+                    url: '/retrieve?id=' + id,
+                    type: 'GET',
+                    xhrFields: {
+                        responseType: 'blob' // Set the response type to 'blob' to handle binary data
+                    },
+                    success: function (response) {
+                        var blob = new Blob([response], { type: 'application/pdf' }); // Create a Blob object from the response
+                        var url = URL.createObjectURL(blob); // Create a URL for the Blob object
+
+                        // Generate the filename
+                        var filename = id + '_' + name + '_' + product + '_' + seller + '.pdf';
+
+                        // Create a link element to trigger the download
+                        var link = document.createElement('a');
+                        link.href = url;
+                        link.download = filename; // Set the filename for the downloaded file
+                        link.click();
+
+                        URL.revokeObjectURL(url); // Release the URL object
+                    },
+                    error: function (xhr, status, error) {
+                        // Handle the error
+                        console.error('Download request failed');
+                        console.log(error);
+                    }
+                });
+            });
+
+            // Handle edit button click
+            $('#example tbody').on('click', '.btn-edit', function () {
+                var id = $(this).data('id');
+                window.location.href = '/edit_data?id=' + id; // Redirect to the edit page with the _inumber as a query parameter
             });
         });
 
+        // 90_John Smith_Widget_Acme Inc.
     </script>
 </body>
 

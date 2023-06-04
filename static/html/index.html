@@ -21,10 +21,8 @@
             <div class="menu">
 
                 <li><a href="/">Generate Invoice</a></li>
-                <li><a href="/edit_data">Edit Invoice</a></li>
 
                 <li><a href="/view_all">View All Invoices</a></li>
-                <li><a href="/retrieve">Retrieve Invoice</a></li>
                 <li><a href="/logout">Logout</a></li>
             </div>
         </ul>
@@ -34,6 +32,7 @@
         <!-- One "tab" for each step in the form: -->
         <div class="tab">
             <h1> Customer Details</h1>
+            <input type="hidden" id="_date" name="_date">
             <p><input placeholder="Customer Name / Company Name" oninput="this.className = ''" name="_name"></p>
             <p><input placeholder="Address" oninput="this.className = ''" name="_addr"></p>
             <p><input placeholder="Phone number" oninput="this.className = ''" name="_tel"></p>
@@ -82,6 +81,15 @@
 
 
     <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var currentDate = new Date();
+            var year = currentDate.getFullYear();
+            var month = String(currentDate.getMonth() + 1).padStart(2, '0');
+            var day = String(currentDate.getDate()).padStart(2, '0');
+
+            var dateInput = document.getElementById('_date');
+            dateInput.value = day + '-' + month + '-' + year;
+        });
         var currentTab = 0;
         showTab(currentTab);
         function showTab(n) {
@@ -100,7 +108,7 @@
                     if (document.getElementById("nextBtn").innerHTML == "Submit") {
                         document.getElementById("regForm").submit();
                         await new Promise(r => setTimeout(r, 1500));
-                        location.reload();
+                        // location.reload();
                     }
                     else {
                         nextPrev(1);

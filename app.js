@@ -56,23 +56,23 @@ app.get('/', (req, res) => {
 //  route for submit form
 app.post('/submit', async (req, res) => {
 
-    if (req.session.loggedin) {
-        if (Object.values(req.body).every(val => val === '')) {
-            res.send("<script> alert('all fields cant be empty'); window.location.replace('/')</script>");
-            return;
-        }
-        await insertInvoice(req.body, connection, res);
-    }
-    else {
-        res.sendFile(__static_html + '/login.html');
-    }
+    await insertInvoice(req.body, connection, res);
+    // if (req.session.loggedin) {
+    //     if (Object.values(req.body).every(val => val === '')) {
+    //         res.send("<script> alert('all fields cant be empty'); window.location.replace('/')</script>");
+    //         return;
+    //     }
+        
+    // }
+    // else {
+    //     res.sendFile(__static_html + '/login.html');
+    // }
 });
 
 
 app.get('/retrieve', (req, res) => {
 
     if (req.session.loggedin) {
-        res.sendFile(__static_html + '/retrieve.html');
         if (req.query.id) {
             console.log(req.query.id);
             retrievInvoice(parseInt(req.query.id), connection, res)
