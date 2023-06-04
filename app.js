@@ -56,17 +56,13 @@ app.get('/', (req, res) => {
 //  route for submit form
 app.post('/submit', async (req, res) => {
 
-    await insertInvoice(req.body, connection, res);
-    // if (req.session.loggedin) {
-    //     if (Object.values(req.body).every(val => val === '')) {
-    //         res.send("<script> alert('all fields cant be empty'); window.location.replace('/')</script>");
-    //         return;
-    //     }
-        
-    // }
-    // else {
-    //     res.sendFile(__static_html + '/login.html');
-    // }
+    if (req.session.loggedin) {
+        await insertInvoice(req.body, connection, res);
+
+    }
+    else {
+        res.sendFile(__static_html + '/login.html');
+    }
 });
 
 
@@ -236,6 +232,7 @@ app.get("/all", (req, res) => {
 
 
 app.get("/view_all", (req, res) => {
+    
     if (req.session.loggedin) {
         res.sendFile(__static_html + '/view_all_invoices.html');
     }
