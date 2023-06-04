@@ -65,8 +65,8 @@
         </style>
 
         <div class="form-row">
-            <label for="_name">Invoice Number:</label>
-            <input type="text" id="id" name="id" readonly>
+            <label for="_inumber">Invoice Number:</label>
+            <input type="text" id="_inumber" name="_inumber" readonly>
         </div>
 
         <div class="form-row">
@@ -125,7 +125,7 @@
         </div>
 
         <div class="form-row">
-            <label style= "margin-left: -18px;" for="_currency">Currency:</label>
+            <label style= "margin-left: -10px;" for="_currency">Currency:</label>
             <select id="_currency" name="_currency">
                 <option value="OCBC_USD">OCBC_USD</option>
                 <option value="SCBL_USD">SCBL_USD</option>
@@ -147,15 +147,6 @@
         <input type="button" value="reGenerate Invoice" onclick="generatePdf()"
             style="background-color: lightseagreen;">
 
-        </div>
-    </form>
-
-    <form action="/retrieve" method="post" id="xyzform" style="display: none;">
-
-        <h1>Retrieve Invoice</h1>
-        <div style="text-align: center;">
-            <p style="padding: 15px;"><input placeholder="Invoice Number" name="_inumber" id="_inumber" required></p>
-            <button type="submit" style="display: block; margin: 10px auto; border-radius: 5%;">Submit</button>
         </div>
     </form>
 
@@ -193,7 +184,7 @@
         document.addEventListener('DOMContentLoaded', function () {
             var urlParams = new URLSearchParams(window.location.search);
             var id = urlParams.get('id');
-            document.getElementById('id').value = id;
+            document.getElementById('_inumber').value = id;
 
             // Make an AJAX request to the server to retrieve data for the given ID
             var xhr = new XMLHttpRequest();

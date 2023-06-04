@@ -58,7 +58,6 @@ app.post('/submit', async (req, res) => {
 
     if (req.session.loggedin) {
         await insertInvoice(req.body, connection, res);
-
     }
     else {
         res.sendFile(__static_html + '/login.html');
@@ -70,31 +69,12 @@ app.get('/retrieve', (req, res) => {
 
     if (req.session.loggedin) {
         if (req.query.id) {
-            console.log(req.query.id);
             retrievInvoice(parseInt(req.query.id), connection, res)
         }
     }
     else {
         res.sendFile(__static_html + '/login.html');
     }
-});
-
-
-app.post('/retrieve', async (req, res) => {
-
-    if (req.session.loggedin) {
-        if (req.query.id) {
-            await retrievInvoice(parseInt(req.query.id), connection, res)
-        }
-        else {
-            await retrievInvoice(parseInt(req.body._inumber) || 1, connection, res)
-        }
-    }
-    else {
-        res.sendFile(__static_html + '/login.html');
-    }
-    // if id exist means we calling this from the edit page else just normal call from the retrieve endpoitt
-
 });
 
 
@@ -195,8 +175,8 @@ app.get("/edit_data", (req, res) => {
 app.post("/edit_data", (req, res) => {
 
     if (req.session.loggedin) {
-        const { _inumber, _name, _addr, _tel, _email, _product, _size, _price, _ucontainer, _ncontainer, _depo, _currency, _delivery, _seller } = req.body;
 
+        const { _inumber, _name, _addr, _tel, _email, _product, _size, _price, _ucontainer, _ncontainer, _depo, _currency, _delivery, _seller } = req.body;
         connection.query('UPDATE invoice SET _name = ?, _addr = ?, _tel = ?, _email = ?, _product = ?, _size = ?, _price = ?, _ucontainer = ?, _ncontainer = ?, _depo = ?, _currency = ?, _delivery = ?, _seller = ? WHERE _inumber = ?', [_name, _addr, _tel, _email, _product, _size, _price, _ucontainer, _ncontainer, _depo, _currency, _delivery, _seller, _inumber], async (error, results, fields) => {
 
             if (error) {
@@ -204,6 +184,7 @@ app.post("/edit_data", (req, res) => {
                 res.status(500).send('Error updating data');
                 return;
             }
+            await retrievInvoice(_inumber, connection, res);
         });
     }
     else {
@@ -232,7 +213,7 @@ app.get("/all", (req, res) => {
 
 
 app.get("/view_all", (req, res) => {
-    
+
     if (req.session.loggedin) {
         res.sendFile(__static_html + '/view_all_invoices.html');
     }
