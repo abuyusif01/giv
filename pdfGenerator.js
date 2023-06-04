@@ -125,8 +125,8 @@ const generateEntry1 = (doc, invoice, section, section_number, x = 0) => {
 
     let text = ""
     section == "sc" ?
-        text = `SC/${section_number}/${month < 10 ? "0" + month : month}/${year}` :
-        text = `PI/${section_number}/${month < 10 ? "0" + month : month}/${year}`
+        text = `SC/${section_number}/${month}/${year}` :
+        text = `PI/${section_number}/${month}/${year}`
 
     doc.fontSize(10).font('Times-Roman');
 
